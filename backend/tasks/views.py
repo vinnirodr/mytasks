@@ -1,6 +1,6 @@
 import datetime
 
-from django.db.models import ProtectedError
+from django.db.models import Case, IntegerField, ProtectedError, Value, When
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -20,7 +20,7 @@ from tasks.serializers import (
     RecurringTaskSerializer,
     TaskDefinitionSerializer,
 )
-from tasks.services import ensure_occurrences_for, ensure_occurrences_for_range
+from tasks.services import ensure_occurrences_for, ensure_occurrences_for_range, refresh_statuses
 
 
 class EnvironmentScopedView(APIView):
@@ -137,13 +137,25 @@ class OccurrenceListCreateView(EnvironmentScopedView):
             monday = anchor - datetime.timedelta(days=anchor.weekday())
             sunday = monday + datetime.timedelta(days=6)
             ensure_occurrences_for_range(environment, monday, sunday)
+            refresh_statuses(environment)
             qs = environment.occurrences.filter(
                 date__gte=monday, date__lte=sunday, is_cancelled=False
             ).order_by("date", "time")
         else:
             day = _parse_date(request.query_params.get("date"))
             ensure_occurrences_for(environment, day)
-            qs = environment.occurrences.filter(date=day, is_cancelled=False).order_by("time")
+            refresh_statuses(environment)
+            qs = (
+                environment.occurrences.filter(date=day, is_cancelled=False)
+                .annotate(
+                    _postponed_last=Case(
+                        When(status=Occurrence.Status.POSTPONED, then=Value(1)),
+                        default=Value(0),
+                        output_field=IntegerField(),
+                    )
+                )
+                .order_by("_postponed_last", "time")
+            )
         return Response(OccurrenceSerializer(qs, many=True).data)
 
     def post(self, request, env_id):
