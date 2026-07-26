@@ -1,6 +1,7 @@
 from django.urls import path
 
 from tasks.views import (
+    OccurrenceListCreateView,
     RecurringTaskDetailView,
     RecurringTaskListCreateView,
     TaskDefinitionDetailView,
@@ -33,5 +34,10 @@ urlpatterns = [
         "recurring-tasks/<uuid:pk>/",
         RecurringTaskDetailView.as_view(),
         name="recurring-task-detail",
+    ),
+    path(
+        "environments/<uuid:env_id>/occurrences/",
+        OccurrenceListCreateView.as_view(),
+        name="occurrence-list",
     ),
 ]

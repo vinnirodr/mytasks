@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from tasks.models import RecurringTask, TaskDefinition
+from tasks.models import Occurrence, RecurringTask, TaskDefinition
 
 
 class TaskDefinitionSerializer(serializers.ModelSerializer):
@@ -29,3 +29,21 @@ class RecurringTaskSerializer(serializers.ModelSerializer):
                 {"task_definition": "A tarefa não pertence a este ambiente."}
             )
         return attrs
+
+
+class OccurrenceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Occurrence
+        fields = [
+            "id",
+            "title",
+            "date",
+            "time",
+            "assignee",
+            "status",
+            "is_one_off",
+            "is_cancelled",
+            "recurring_task",
+            "task_definition",
+        ]
+        read_only_fields = fields

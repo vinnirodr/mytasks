@@ -1,7 +1,9 @@
+import datetime
+
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from rest_framework import status as http_status
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -9,7 +11,12 @@ from environments.models import Environment
 from environments.permissions import get_membership, is_admin
 from tasks.models import RecurringTask, TaskDefinition
 from tasks.presets import get_recommended_tasks
-from tasks.serializers import RecurringTaskSerializer, TaskDefinitionSerializer
+from tasks.serializers import (
+    OccurrenceSerializer,
+    RecurringTaskSerializer,
+    TaskDefinitionSerializer,
+)
+from tasks.services import ensure_occurrences_for, ensure_occurrences_for_range
 
 
 class EnvironmentScopedView(APIView):
@@ -100,3 +107,31 @@ class RecurringTaskDetailView(APIView):
             raise PermissionDenied("Apenas o ADM pode fazer isso.")
         rt.delete()
         return Response(status=http_status.HTTP_204_NO_CONTENT)
+
+
+def _parse_date(value):
+    if not value:
+        raise ValidationError({"date": "Parâmetro obrigatório (YYYY-MM-DD)."})
+    try:
+        return datetime.date.fromisoformat(value)
+    except ValueError:
+        raise ValidationError({"date": "Data inválida (use YYYY-MM-DD)."})
+
+
+class OccurrenceListCreateView(EnvironmentScopedView):
+    def get(self, request, env_id):
+        environment = self.get_environment()
+        week_of = request.query_params.get("week_of")
+        if week_of:
+            anchor = _parse_date(week_of)
+            monday = anchor - datetime.timedelta(days=anchor.weekday())
+            sunday = monday + datetime.timedelta(days=6)
+            ensure_occurrences_for_range(environment, monday, sunday)
+            qs = environment.occurrences.filter(
+                date__gte=monday, date__lte=sunday, is_cancelled=False
+            ).order_by("date", "time")
+        else:
+            day = _parse_date(request.query_params.get("date"))
+            ensure_occurrences_for(environment, day)
+            qs = environment.occurrences.filter(date=day, is_cancelled=False).order_by("time")
+        return Response(OccurrenceSerializer(qs, many=True).data)
