@@ -3,6 +3,7 @@ import datetime
 from django.db.models import ProtectedError
 from django.http import Http404
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from rest_framework import status as http_status
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
@@ -189,3 +190,15 @@ class OccurrenceCancelView(APIView):
         occ.is_cancelled = True
         occ.save(update_fields=["is_cancelled"])
         return Response({"is_cancelled": True})
+
+
+class OccurrenceCompleteView(APIView):
+    def post(self, request, pk):
+        occ = get_object_or_404(Occurrence, pk=pk)
+        if get_membership(request.user, occ.environment) is None:
+            raise Http404
+        occ.status = Occurrence.Status.DONE
+        occ.completed_by = request.user
+        occ.completed_at = timezone.now()
+        occ.save(update_fields=["status", "completed_by", "completed_at"])
+        return Response(OccurrenceSerializer(occ).data)

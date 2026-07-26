@@ -22,7 +22,7 @@ class EnvironmentSerializer(serializers.ModelSerializer):
     def validate_timezone(self, value):
         try:
             ZoneInfo(value)
-        except (ZoneInfoNotFoundError, ValueError):
+        except ZoneInfoNotFoundError, ValueError:
             raise serializers.ValidationError("Fuso horário inválido.")
         return value
 
