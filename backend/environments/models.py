@@ -55,3 +55,24 @@ class Membership(models.Model):
 
     def __str__(self):
         return f"{self.user} @ {self.environment} ({self.role})"
+
+
+class Invitation(models.Model):
+    class Status(models.TextChoices):
+        PENDING = "PENDING", "Pendente"
+        ACCEPTED = "ACCEPTED", "Aceito"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    environment = models.ForeignKey(
+        Environment, on_delete=models.CASCADE, related_name="invitations"
+    )
+    email = models.EmailField()
+    token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING)
+    invited_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="sent_invitations"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.email} → {self.environment} ({self.status})"
