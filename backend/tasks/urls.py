@@ -1,6 +1,8 @@
 from django.urls import path
 
 from tasks.views import (
+    RecurringTaskDetailView,
+    RecurringTaskListCreateView,
     TaskDefinitionDetailView,
     TaskDefinitionListCreateView,
     TaskPresetsView,
@@ -21,5 +23,15 @@ urlpatterns = [
         "task-definitions/<uuid:pk>/",
         TaskDefinitionDetailView.as_view(),
         name="task-definition-detail",
+    ),
+    path(
+        "environments/<uuid:env_id>/recurring-tasks/",
+        RecurringTaskListCreateView.as_view(),
+        name="recurring-task-list",
+    ),
+    path(
+        "recurring-tasks/<uuid:pk>/",
+        RecurringTaskDetailView.as_view(),
+        name="recurring-task-detail",
     ),
 ]
