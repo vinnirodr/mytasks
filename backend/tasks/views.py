@@ -14,6 +14,7 @@ from tasks.presets import get_recommended_tasks
 from tasks.serializers import (
     OccurrenceEditSerializer,
     OccurrenceSerializer,
+    OneOffOccurrenceSerializer,
     RecurringTaskSerializer,
     TaskDefinitionSerializer,
 )
@@ -136,6 +137,20 @@ class OccurrenceListCreateView(EnvironmentScopedView):
             ensure_occurrences_for(environment, day)
             qs = environment.occurrences.filter(date=day, is_cancelled=False).order_by("time")
         return Response(OccurrenceSerializer(qs, many=True).data)
+
+    def post(self, request, env_id):
+        environment = self.get_environment()  # 404 for non-members
+        serializer = OneOffOccurrenceSerializer(
+            data=request.data, context={"environment": environment}
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save(
+            environment=environment,
+            is_one_off=True,
+            created_by=request.user,
+            assignee=request.user,
+        )
+        return Response(serializer.data, status=http_status.HTTP_201_CREATED)
 
 
 class OccurrenceDetailView(APIView):

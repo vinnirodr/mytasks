@@ -53,3 +53,19 @@ class OccurrenceEditSerializer(serializers.ModelSerializer):
     class Meta:
         model = Occurrence
         fields = ["assignee", "time"]
+
+
+class OneOffOccurrenceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Occurrence
+        fields = ["id", "title", "date", "time", "task_definition"]
+        read_only_fields = ["id"]
+
+    def validate(self, attrs):
+        environment = self.context["environment"]
+        td = attrs.get("task_definition")
+        if td is not None and td.environment_id != environment.id:
+            raise serializers.ValidationError(
+                {"task_definition": "A tarefa não pertence a este ambiente."}
+            )
+        return attrs
