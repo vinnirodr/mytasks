@@ -47,3 +47,9 @@ class OccurrenceSerializer(serializers.ModelSerializer):
             "task_definition",
         ]
         read_only_fields = fields
+
+
+class OccurrenceEditSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Occurrence
+        fields = ["assignee", "time"]

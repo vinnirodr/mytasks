@@ -9,9 +9,10 @@ from rest_framework.views import APIView
 
 from environments.models import Environment
 from environments.permissions import get_membership, is_admin
-from tasks.models import RecurringTask, TaskDefinition
+from tasks.models import Occurrence, RecurringTask, TaskDefinition
 from tasks.presets import get_recommended_tasks
 from tasks.serializers import (
+    OccurrenceEditSerializer,
     OccurrenceSerializer,
     RecurringTaskSerializer,
     TaskDefinitionSerializer,
@@ -135,3 +136,32 @@ class OccurrenceListCreateView(EnvironmentScopedView):
             ensure_occurrences_for(environment, day)
             qs = environment.occurrences.filter(date=day, is_cancelled=False).order_by("time")
         return Response(OccurrenceSerializer(qs, many=True).data)
+
+
+class OccurrenceDetailView(APIView):
+    def _get_object(self, request, pk):
+        occ = get_object_or_404(Occurrence, pk=pk)
+        if get_membership(request.user, occ.environment) is None:
+            raise Http404
+        return occ
+
+    def patch(self, request, pk):
+        occ = self._get_object(request, pk)
+        if not is_admin(request.user, occ.environment):
+            raise PermissionDenied("Apenas o ADM pode fazer isso.")
+        serializer = OccurrenceEditSerializer(occ, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(OccurrenceSerializer(occ).data)
+
+
+class OccurrenceCancelView(APIView):
+    def post(self, request, pk):
+        occ = get_object_or_404(Occurrence, pk=pk)
+        if get_membership(request.user, occ.environment) is None:
+            raise Http404
+        if not is_admin(request.user, occ.environment):
+            raise PermissionDenied("Apenas o ADM pode fazer isso.")
+        occ.is_cancelled = True
+        occ.save(update_fields=["is_cancelled"])
+        return Response({"is_cancelled": True})
