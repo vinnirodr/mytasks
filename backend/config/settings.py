@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "accounts",
     "environments",
+    "tasks",
 ]
 
 AUTH_USER_MODEL = "accounts.User"
