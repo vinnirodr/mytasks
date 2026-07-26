@@ -90,6 +90,14 @@ class Occurrence(models.Model):
         related_name="created_occurrences",
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    completed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="completed_occurrences",
+    )
+    completed_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         constraints = [
