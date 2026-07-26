@@ -204,6 +204,23 @@ class OccurrenceCompleteView(APIView):
         return Response(OccurrenceSerializer(occ).data)
 
 
+class OccurrencePostponeView(APIView):
+    def post(self, request, pk):
+        occ = get_object_or_404(Occurrence, pk=pk)
+        if get_membership(request.user, occ.environment) is None:
+            raise Http404
+        if occ.assignee_id != request.user.id and not is_admin(request.user, occ.environment):
+            raise PermissionDenied("Só o responsável ou o ADM podem adiar.")
+        if occ.status not in (Occurrence.Status.PENDING, Occurrence.Status.LATE):
+            return Response(
+                {"detail": "Só é possível adiar uma tarefa pendente ou atrasada."},
+                status=http_status.HTTP_400_BAD_REQUEST,
+            )
+        occ.status = Occurrence.Status.POSTPONED
+        occ.save(update_fields=["status"])
+        return Response(OccurrenceSerializer(occ).data)
+
+
 class OccurrencePickupView(APIView):
     def post(self, request, pk):
         occ = get_object_or_404(Occurrence, pk=pk)
