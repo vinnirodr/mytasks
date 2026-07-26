@@ -1,3 +1,6 @@
+import uuid
+
+from django.http import Http404
 from django.shortcuts import get_object_or_404
 from rest_framework import mixins, viewsets
 from rest_framework import status as http_status
@@ -57,14 +60,18 @@ class EnvironmentViewSet(
 class AcceptInvitationView(APIView):
     def post(self, request):
         token = request.data.get("token")
+        try:
+            uuid.UUID(str(token))
+        except ValueError, TypeError:
+            raise Http404
         invitation = get_object_or_404(Invitation, token=token)
 
+        if invitation.email.lower() != request.user.email.lower():
+            raise PermissionDenied("Este convite é para outro e-mail.")
         if invitation.status == Invitation.Status.ACCEPTED:
             return Response(
                 {"detail": "Convite já aceito."}, status=http_status.HTTP_400_BAD_REQUEST
             )
-        if invitation.email.lower() != request.user.email.lower():
-            raise PermissionDenied("Este convite é para outro e-mail.")
 
         membership, _ = Membership.objects.get_or_create(
             environment=invitation.environment,
