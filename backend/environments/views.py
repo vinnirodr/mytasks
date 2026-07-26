@@ -1,7 +1,10 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import mixins, viewsets
+from rest_framework import status as http_status
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from environments.models import Environment, Invitation, Membership
 from environments.permissions import IsEnvironmentAdmin, IsEnvironmentMember, is_admin
@@ -49,3 +52,29 @@ class EnvironmentViewSet(
             invited_by=request.user,
         )
         return Response(InvitationSerializer(invitation).data, status=201)
+
+
+class AcceptInvitationView(APIView):
+    def post(self, request):
+        token = request.data.get("token")
+        invitation = get_object_or_404(Invitation, token=token)
+
+        if invitation.status == Invitation.Status.ACCEPTED:
+            return Response(
+                {"detail": "Convite já aceito."}, status=http_status.HTTP_400_BAD_REQUEST
+            )
+        if invitation.email.lower() != request.user.email.lower():
+            raise PermissionDenied("Este convite é para outro e-mail.")
+
+        membership, _ = Membership.objects.get_or_create(
+            environment=invitation.environment,
+            user=request.user,
+            defaults={"role": Membership.Role.MEMBER},
+        )
+        invitation.status = Invitation.Status.ACCEPTED
+        invitation.save(update_fields=["status"])
+
+        return Response(
+            {"environment_id": str(invitation.environment_id), "role": membership.role},
+            status=http_status.HTTP_200_OK,
+        )
