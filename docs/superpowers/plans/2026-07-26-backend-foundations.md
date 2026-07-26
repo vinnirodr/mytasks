@@ -6,12 +6,12 @@
 
 **Architecture:** A single Django project (`config`) with two apps: `accounts` (custom email user + JWT auth) and `environments` (Environment, Membership, Invitation). REST API via Django REST Framework. Business rules (permissions by role, invite acceptance) live in the backend and are covered by tests. PostgreSQL is the datastore; pytest-django is the test runner.
 
-**Tech Stack:** Python 3.12, Django 5.0, Django REST Framework 3.15, djangorestframework-simplejwt 5.3 (JWT), psycopg 3 (Postgres driver), pytest 8 + pytest-django 4.
+**Tech Stack:** Python 3.14, Django 6.0, Django REST Framework 3.17, djangorestframework-simplejwt 5.5 (JWT), psycopg 3 (Postgres driver), pytest 9 + pytest-django 4.
 
 ## Global Constraints
 
-- Python **3.12** (version floor).
-- Django **5.0.x**; Django REST Framework **3.15.x**.
+- Python **3.14** (matches the developer's environment; verified that the full stack installs and imports on 3.14.3).
+- Django **6.0.x**; Django REST Framework **3.17.x**.
 - Database: **PostgreSQL 15+**. No SQLite, even for tests (tests run against Postgres).
 - Custom user model **from the first migration** — email is the login field (`USERNAME_FIELD = "email"`), there is no `username` field.
 - Auth tokens: **JWT** via `djangorestframework-simplejwt`. Access + refresh tokens.
@@ -44,14 +44,14 @@
 - [ ] **Step 1: Create `backend/requirements.txt`**
 
 ```
-Django==5.0.6
-djangorestframework==3.15.1
-djangorestframework-simplejwt==5.3.1
-psycopg[binary]==3.1.19
-django-environ==0.11.2
-pytest==8.2.0
-pytest-django==4.8.0
-ruff==0.4.4
+Django==6.0.7
+djangorestframework==3.17.1
+djangorestframework-simplejwt==5.5.1
+psycopg[binary]==3.3.4
+django-environ==0.14.0
+pytest==9.1.1
+pytest-django==4.12.0
+ruff==0.16.0
 ```
 
 - [ ] **Step 2: Create `backend/pyproject.toml`**
@@ -59,7 +59,7 @@ ruff==0.4.4
 ```toml
 [tool.ruff]
 line-length = 100
-target-version = "py312"
+target-version = "py314"
 
 [tool.ruff.lint]
 select = ["E", "F", "I"]
