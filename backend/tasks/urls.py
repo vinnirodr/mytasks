@@ -5,6 +5,7 @@ from tasks.views import (
     OccurrenceCompleteView,
     OccurrenceDetailView,
     OccurrenceListCreateView,
+    OccurrencePickupView,
     RecurringTaskDetailView,
     RecurringTaskListCreateView,
     TaskDefinitionDetailView,
@@ -57,5 +58,10 @@ urlpatterns = [
         "occurrences/<uuid:pk>/complete/",
         OccurrenceCompleteView.as_view(),
         name="occurrence-complete",
+    ),
+    path(
+        "occurrences/<uuid:pk>/pickup/",
+        OccurrencePickupView.as_view(),
+        name="occurrence-pickup",
     ),
 ]

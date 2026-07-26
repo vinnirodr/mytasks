@@ -202,3 +202,18 @@ class OccurrenceCompleteView(APIView):
         occ.completed_at = timezone.now()
         occ.save(update_fields=["status", "completed_by", "completed_at"])
         return Response(OccurrenceSerializer(occ).data)
+
+
+class OccurrencePickupView(APIView):
+    def post(self, request, pk):
+        occ = get_object_or_404(Occurrence, pk=pk)
+        if get_membership(request.user, occ.environment) is None:
+            raise Http404
+        if occ.assignee_id is not None:
+            return Response(
+                {"detail": "Esta tarefa já tem um responsável."},
+                status=http_status.HTTP_400_BAD_REQUEST,
+            )
+        occ.assignee = request.user
+        occ.save(update_fields=["assignee"])
+        return Response(OccurrenceSerializer(occ).data)
