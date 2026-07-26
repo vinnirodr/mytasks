@@ -209,6 +209,11 @@ class OccurrenceCompleteView(APIView):
         occ = get_object_or_404(Occurrence, pk=pk)
         if get_membership(request.user, occ.environment) is None:
             raise Http404
+        if occ.is_cancelled:
+            return Response(
+                {"detail": "Esta ocorrência foi cancelada."},
+                status=http_status.HTTP_400_BAD_REQUEST,
+            )
         occ.status = Occurrence.Status.DONE
         occ.completed_by = request.user
         occ.completed_at = timezone.now()
@@ -221,6 +226,11 @@ class OccurrencePostponeView(APIView):
         occ = get_object_or_404(Occurrence, pk=pk)
         if get_membership(request.user, occ.environment) is None:
             raise Http404
+        if occ.is_cancelled:
+            return Response(
+                {"detail": "Esta ocorrência foi cancelada."},
+                status=http_status.HTTP_400_BAD_REQUEST,
+            )
         if occ.assignee_id != request.user.id and not is_admin(request.user, occ.environment):
             raise PermissionDenied("Só o responsável ou o ADM podem adiar.")
         if occ.status not in (Occurrence.Status.PENDING, Occurrence.Status.LATE):
@@ -238,6 +248,11 @@ class OccurrencePickupView(APIView):
         occ = get_object_or_404(Occurrence, pk=pk)
         if get_membership(request.user, occ.environment) is None:
             raise Http404
+        if occ.is_cancelled:
+            return Response(
+                {"detail": "Esta ocorrência foi cancelada."},
+                status=http_status.HTTP_400_BAD_REQUEST,
+            )
         if occ.assignee_id is not None:
             return Response(
                 {"detail": "Esta tarefa já tem um responsável."},

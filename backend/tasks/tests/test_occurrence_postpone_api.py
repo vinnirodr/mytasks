@@ -60,3 +60,12 @@ def test_cannot_postpone_done_occurrence():
     env, ana, bob, carol, occ = _setup(status=Occurrence.Status.DONE)
     resp = auth_client(bob).post(f"/api/occurrences/{occ.id}/postpone/")
     assert resp.status_code == 400
+
+
+@pytest.mark.django_db
+def test_cannot_postpone_cancelled_occurrence():
+    env, ana, bob, carol, occ = _setup()
+    occ.is_cancelled = True
+    occ.save(update_fields=["is_cancelled"])
+    resp = auth_client(bob).post(f"/api/occurrences/{occ.id}/postpone/")
+    assert resp.status_code == 400

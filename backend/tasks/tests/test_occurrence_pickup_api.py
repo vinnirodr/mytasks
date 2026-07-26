@@ -47,3 +47,14 @@ def test_outsider_cannot_pick_up():
     out = User.objects.create_user(email="out@example.com", password="x")
     resp = auth_client(out).post(f"/api/occurrences/{occ.id}/pickup/")
     assert resp.status_code == 404
+
+
+@pytest.mark.django_db
+def test_cannot_pick_up_cancelled_occurrence():
+    env, ana, bob, occ = _open_occ()
+    occ.is_cancelled = True
+    occ.save(update_fields=["is_cancelled"])
+    resp = auth_client(bob).post(f"/api/occurrences/{occ.id}/pickup/")
+    assert resp.status_code == 400
+    occ.refresh_from_db()
+    assert occ.assignee_id is None

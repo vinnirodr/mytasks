@@ -51,6 +51,8 @@ _TERMINAL_STATUSES = {Occurrence.Status.DONE, Occurrence.Status.MISSED}
 
 def _target_status(occurrence, today, now_time):
     """The status this occurrence should have, given local `today` and `now_time`."""
+    if occurrence.status in _TERMINAL_STATUSES:
+        return occurrence.status
     if occurrence.date < today:
         return Occurrence.Status.MISSED
     if (

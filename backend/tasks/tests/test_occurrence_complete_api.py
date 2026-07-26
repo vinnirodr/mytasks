@@ -44,3 +44,14 @@ def test_outsider_cannot_complete():
     assert resp.status_code == 404
     occ.refresh_from_db()
     assert occ.status == Occurrence.Status.PENDING
+
+
+@pytest.mark.django_db
+def test_cannot_complete_cancelled_occurrence():
+    env, ana, bob, occ = _setup()
+    occ.is_cancelled = True
+    occ.save(update_fields=["is_cancelled"])
+    resp = auth_client(bob).post(f"/api/occurrences/{occ.id}/complete/")
+    assert resp.status_code == 400
+    occ.refresh_from_db()
+    assert occ.status == Occurrence.Status.PENDING

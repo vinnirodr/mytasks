@@ -81,3 +81,10 @@ def test_cancelled_is_ignored(env):
     refresh_statuses(env, now_dt=_aware(2026, 7, 27, 8, 0))
     occ.refresh_from_db()
     assert occ.status == Occurrence.Status.PENDING
+
+
+def test_late_yesterday_becomes_missed(env):
+    occ = _occ(env, datetime.date(2026, 7, 26), datetime.time(20, 0), status=Occurrence.Status.LATE)
+    refresh_statuses(env, now_dt=_aware(2026, 7, 27, 8, 0))
+    occ.refresh_from_db()
+    assert occ.status == Occurrence.Status.MISSED
