@@ -37,7 +37,7 @@ class EnvironmentViewSet(
     def perform_create(self, serializer):
         env = Environment.create_with_admin(
             name=serializer.validated_data["name"],
-            env_type=serializer.validated_data["env_type"],
+            env_type=serializer.validated_data.get("env_type", Environment.Type.HOUSE),
             owner=self.request.user,
         )
         serializer.instance = env

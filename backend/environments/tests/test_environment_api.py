@@ -32,6 +32,14 @@ def test_create_environment_makes_requester_admin():
 
 
 @pytest.mark.django_db
+def test_create_environment_without_type_defaults_to_house():
+    ana = User.objects.create_user(email="ana@example.com", password="x")
+    resp = auth_client(ana).post("/api/environments/", {"name": "Casa"}, format="json")
+    assert resp.status_code == 201
+    assert resp.data["env_type"] == "HOUSE"
+
+
+@pytest.mark.django_db
 def test_list_only_returns_my_environments():
     ana = User.objects.create_user(email="ana@example.com", password="x")
     bob = User.objects.create_user(email="bob@example.com", password="x")
