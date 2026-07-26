@@ -55,3 +55,17 @@ def test_token_and_me(client):
 def test_me_requires_auth(client):
     resp = client.get("/api/auth/me/")
     assert resp.status_code == 401
+
+
+@pytest.mark.django_db
+def test_token_refresh_returns_new_access(client):
+    User.objects.create_user(email="ana@example.com", password="s3cret!!")
+    token_resp = client.post(
+        "/api/auth/token/",
+        {"email": "ana@example.com", "password": "s3cret!!"},
+        format="json",
+    )
+    refresh = token_resp.data["refresh"]
+    resp = client.post("/api/auth/token/refresh/", {"refresh": refresh}, format="json")
+    assert resp.status_code == 200
+    assert "access" in resp.data
