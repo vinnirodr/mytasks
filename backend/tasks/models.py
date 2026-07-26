@@ -41,3 +41,63 @@ class RecurringTask(models.Model):
 
     def __str__(self):
         return f"{self.task_definition} · weekday {self.weekday} @ {self.time}"
+
+
+class Occurrence(models.Model):
+    class Status(models.TextChoices):
+        PENDING = "PENDING", "Pendente"
+        LATE = "LATE", "Atrasada"
+        DONE = "DONE", "Feita"
+        POSTPONED = "POSTPONED", "Adiada"
+        MISSED = "MISSED", "Não feita"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    environment = models.ForeignKey(
+        Environment, on_delete=models.CASCADE, related_name="occurrences"
+    )
+    recurring_task = models.ForeignKey(
+        RecurringTask,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="occurrences",
+    )
+    task_definition = models.ForeignKey(
+        TaskDefinition,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="occurrences",
+    )
+    title = models.CharField(max_length=120)
+    date = models.DateField()
+    time = models.TimeField(null=True, blank=True)
+    assignee = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="occurrences",
+    )
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING)
+    is_cancelled = models.BooleanField(default=False)
+    is_one_off = models.BooleanField(default=False)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="created_occurrences",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["recurring_task", "date"],
+                name="uniq_recurring_occurrence_per_date",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.title} @ {self.date}"
