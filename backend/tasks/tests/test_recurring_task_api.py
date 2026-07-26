@@ -55,6 +55,23 @@ def test_reject_task_definition_from_other_environment():
 
 
 @pytest.mark.django_db
+def test_reject_assignee_not_member_of_environment():
+    env, ana, bob, td = _setup()
+    outsider = User.objects.create_user(email="out@example.com", password="x")
+    resp = auth_client(ana).post(
+        f"/api/environments/{env.id}/recurring-tasks/",
+        {
+            "task_definition": str(td.id),
+            "weekday": 0,
+            "time": "20:00",
+            "assignee": str(outsider.id),
+        },
+        format="json",
+    )
+    assert resp.status_code == 400
+
+
+@pytest.mark.django_db
 def test_admin_patches_and_deletes_recurring_task():
     env, ana, bob, td = _setup()
     rt = RecurringTask.objects.create(environment=env, task_definition=td, weekday=0, time="20:00")

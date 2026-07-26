@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from environments.permissions import get_membership
 from tasks.models import Occurrence, RecurringTask, TaskDefinition
 
 
@@ -28,6 +29,11 @@ class RecurringTaskSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 {"task_definition": "A tarefa não pertence a este ambiente."}
             )
+        assignee = attrs.get("assignee")
+        if assignee is not None and get_membership(assignee, environment) is None:
+            raise serializers.ValidationError(
+                {"assignee": "O responsável precisa ser membro deste ambiente."}
+            )
         return attrs
 
 
@@ -53,6 +59,15 @@ class OccurrenceEditSerializer(serializers.ModelSerializer):
     class Meta:
         model = Occurrence
         fields = ["assignee", "time"]
+
+    def validate(self, attrs):
+        assignee = attrs.get("assignee")
+        environment = self.context["environment"]
+        if assignee is not None and get_membership(assignee, environment) is None:
+            raise serializers.ValidationError(
+                {"assignee": "O responsável precisa ser membro deste ambiente."}
+            )
+        return attrs
 
 
 class OneOffOccurrenceSerializer(serializers.ModelSerializer):

@@ -48,6 +48,16 @@ def test_admin_reassigns_single_occurrence_without_touching_pattern():
 
 
 @pytest.mark.django_db
+def test_reject_reassign_to_non_member():
+    env, ana, bob, rt, occ = _setup_occurrence()
+    outsider = User.objects.create_user(email="out@example.com", password="x")
+    resp = auth_client(ana).patch(
+        f"/api/occurrences/{occ.id}/", {"assignee": str(outsider.id)}, format="json"
+    )
+    assert resp.status_code == 400
+
+
+@pytest.mark.django_db
 def test_member_cannot_edit_occurrence():
     env, ana, bob, rt, occ = _setup_occurrence()
     resp = auth_client(bob).patch(f"/api/occurrences/{occ.id}/", {"time": "22:00"}, format="json")

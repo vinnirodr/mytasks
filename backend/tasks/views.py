@@ -1,5 +1,6 @@
 import datetime
 
+from django.db.models import ProtectedError
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from rest_framework import status as http_status
@@ -64,7 +65,13 @@ class TaskDefinitionDetailView(APIView):
             raise Http404
         if not is_admin(request.user, td.environment):
             raise PermissionDenied("Apenas o ADM pode fazer isso.")
-        td.delete()
+        try:
+            td.delete()
+        except ProtectedError:
+            return Response(
+                {"detail": "Esta tarefa está em uso pela agenda e não pode ser removida."},
+                status=http_status.HTTP_409_CONFLICT,
+            )
         return Response(status=http_status.HTTP_204_NO_CONTENT)
 
 
@@ -164,7 +171,9 @@ class OccurrenceDetailView(APIView):
         occ = self._get_object(request, pk)
         if not is_admin(request.user, occ.environment):
             raise PermissionDenied("Apenas o ADM pode fazer isso.")
-        serializer = OccurrenceEditSerializer(occ, data=request.data, partial=True)
+        serializer = OccurrenceEditSerializer(
+            occ, data=request.data, partial=True, context={"environment": occ.environment}
+        )
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(OccurrenceSerializer(occ).data)

@@ -60,3 +60,19 @@ def test_member_cannot_delete_task_definition():
     resp = auth_client(bob).delete(f"/api/task-definitions/{td.id}/")
     assert resp.status_code == 403
     assert TaskDefinition.objects.filter(id=td.id).exists()
+
+
+@pytest.mark.django_db
+def test_delete_in_use_task_definition_returns_409():
+    env, ana, bob = _env_with_member()
+    import datetime
+
+    from tasks.models import RecurringTask
+
+    td = TaskDefinition.objects.create(environment=env, name="Louça")
+    RecurringTask.objects.create(
+        environment=env, task_definition=td, weekday=0, time=datetime.time(20, 0)
+    )
+    resp = auth_client(ana).delete(f"/api/task-definitions/{td.id}/")
+    assert resp.status_code == 409
+    assert TaskDefinition.objects.filter(id=td.id).exists()
