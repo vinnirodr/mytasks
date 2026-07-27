@@ -18,15 +18,18 @@ def env(db):
 
 
 @pytest.mark.django_db
-def test_board_marks_overdue_as_late_on_read(env):
+def test_board_refreshes_statuses_on_read(env):
     ana = env.created_by
-    # An occurrence earlier today with a time already past.
-    today = timezone.localtime(timezone.now()).date()
-    Occurrence.objects.create(environment=env, title="Louça", date=today, time=datetime.time(0, 1))
-    resp = auth_client(ana).get(f"/api/environments/{env.id}/occurrences/?date={today.isoformat()}")
+    # A long-past PENDING occurrence must be flipped by refresh_statuses when the
+    # board is read. A far-past date is MISSED in every timezone and at any hour,
+    # so this deterministically proves the view refreshes on GET. (The specific
+    # PENDING->LATE transition is covered by test_refresh_statuses with an injected now.)
+    past = datetime.date(2020, 1, 1)
+    Occurrence.objects.create(environment=env, title="Louça", date=past, time=datetime.time(20, 0))
+    resp = auth_client(ana).get(f"/api/environments/{env.id}/occurrences/?date={past.isoformat()}")
     assert resp.status_code == 200
     statuses = {o["title"]: o["status"] for o in resp.data}
-    assert statuses["Louça"] == "LATE"
+    assert statuses["Louça"] == "MISSED"
 
 
 @pytest.mark.django_db
