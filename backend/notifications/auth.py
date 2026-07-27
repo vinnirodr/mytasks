@@ -17,5 +17,5 @@ def get_user_from_token(token):
         return None
     try:
         return User.objects.get(id=access["user_id"])
-    except (User.DoesNotExist, KeyError):
+    except User.DoesNotExist, KeyError:
         return None
