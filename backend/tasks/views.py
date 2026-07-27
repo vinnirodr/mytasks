@@ -1,8 +1,9 @@
 import datetime
 
-from django.db.models import ProtectedError
+from django.db.models import Case, IntegerField, ProtectedError, Value, When
 from django.http import Http404
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from rest_framework import status as http_status
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
@@ -19,7 +20,7 @@ from tasks.serializers import (
     RecurringTaskSerializer,
     TaskDefinitionSerializer,
 )
-from tasks.services import ensure_occurrences_for, ensure_occurrences_for_range
+from tasks.services import ensure_occurrences_for, ensure_occurrences_for_range, refresh_statuses
 
 
 class EnvironmentScopedView(APIView):
@@ -136,13 +137,25 @@ class OccurrenceListCreateView(EnvironmentScopedView):
             monday = anchor - datetime.timedelta(days=anchor.weekday())
             sunday = monday + datetime.timedelta(days=6)
             ensure_occurrences_for_range(environment, monday, sunday)
+            refresh_statuses(environment)
             qs = environment.occurrences.filter(
                 date__gte=monday, date__lte=sunday, is_cancelled=False
             ).order_by("date", "time")
         else:
             day = _parse_date(request.query_params.get("date"))
             ensure_occurrences_for(environment, day)
-            qs = environment.occurrences.filter(date=day, is_cancelled=False).order_by("time")
+            refresh_statuses(environment)
+            qs = (
+                environment.occurrences.filter(date=day, is_cancelled=False)
+                .annotate(
+                    _postponed_last=Case(
+                        When(status=Occurrence.Status.POSTPONED, then=Value(1)),
+                        default=Value(0),
+                        output_field=IntegerField(),
+                    )
+                )
+                .order_by("_postponed_last", "time")
+            )
         return Response(OccurrenceSerializer(qs, many=True).data)
 
     def post(self, request, env_id):
@@ -189,3 +202,62 @@ class OccurrenceCancelView(APIView):
         occ.is_cancelled = True
         occ.save(update_fields=["is_cancelled"])
         return Response({"is_cancelled": True})
+
+
+class OccurrenceCompleteView(APIView):
+    def post(self, request, pk):
+        occ = get_object_or_404(Occurrence, pk=pk)
+        if get_membership(request.user, occ.environment) is None:
+            raise Http404
+        if occ.is_cancelled:
+            return Response(
+                {"detail": "Esta ocorrência foi cancelada."},
+                status=http_status.HTTP_400_BAD_REQUEST,
+            )
+        occ.status = Occurrence.Status.DONE
+        occ.completed_by = request.user
+        occ.completed_at = timezone.now()
+        occ.save(update_fields=["status", "completed_by", "completed_at"])
+        return Response(OccurrenceSerializer(occ).data)
+
+
+class OccurrencePostponeView(APIView):
+    def post(self, request, pk):
+        occ = get_object_or_404(Occurrence, pk=pk)
+        if get_membership(request.user, occ.environment) is None:
+            raise Http404
+        if occ.is_cancelled:
+            return Response(
+                {"detail": "Esta ocorrência foi cancelada."},
+                status=http_status.HTTP_400_BAD_REQUEST,
+            )
+        if occ.assignee_id != request.user.id and not is_admin(request.user, occ.environment):
+            raise PermissionDenied("Só o responsável ou o ADM podem adiar.")
+        if occ.status not in (Occurrence.Status.PENDING, Occurrence.Status.LATE):
+            return Response(
+                {"detail": "Só é possível adiar uma tarefa pendente ou atrasada."},
+                status=http_status.HTTP_400_BAD_REQUEST,
+            )
+        occ.status = Occurrence.Status.POSTPONED
+        occ.save(update_fields=["status"])
+        return Response(OccurrenceSerializer(occ).data)
+
+
+class OccurrencePickupView(APIView):
+    def post(self, request, pk):
+        occ = get_object_or_404(Occurrence, pk=pk)
+        if get_membership(request.user, occ.environment) is None:
+            raise Http404
+        if occ.is_cancelled:
+            return Response(
+                {"detail": "Esta ocorrência foi cancelada."},
+                status=http_status.HTTP_400_BAD_REQUEST,
+            )
+        if occ.assignee_id is not None:
+            return Response(
+                {"detail": "Esta tarefa já tem um responsável."},
+                status=http_status.HTTP_400_BAD_REQUEST,
+            )
+        occ.assignee = request.user
+        occ.save(update_fields=["assignee"])
+        return Response(OccurrenceSerializer(occ).data)

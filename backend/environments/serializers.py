@@ -1,3 +1,5 @@
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+
 from rest_framework import serializers
 
 from environments.models import Environment, Invitation, Membership
@@ -9,13 +11,20 @@ class EnvironmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Environment
-        fields = ["id", "name", "env_type", "role"]
+        fields = ["id", "name", "env_type", "timezone", "role"]
         read_only_fields = ["id", "role"]
 
     def get_role(self, obj):
         user = self.context["request"].user
         membership = get_membership(user, obj)
         return membership.role if membership else None
+
+    def validate_timezone(self, value):
+        try:
+            ZoneInfo(value)
+        except ZoneInfoNotFoundError, ValueError:
+            raise serializers.ValidationError("Fuso horário inválido.")
+        return value
 
 
 class InvitationSerializer(serializers.ModelSerializer):

@@ -2,8 +2,11 @@ from django.urls import path
 
 from tasks.views import (
     OccurrenceCancelView,
+    OccurrenceCompleteView,
     OccurrenceDetailView,
     OccurrenceListCreateView,
+    OccurrencePickupView,
+    OccurrencePostponeView,
     RecurringTaskDetailView,
     RecurringTaskListCreateView,
     TaskDefinitionDetailView,
@@ -51,5 +54,20 @@ urlpatterns = [
         "occurrences/<uuid:pk>/cancel/",
         OccurrenceCancelView.as_view(),
         name="occurrence-cancel",
+    ),
+    path(
+        "occurrences/<uuid:pk>/complete/",
+        OccurrenceCompleteView.as_view(),
+        name="occurrence-complete",
+    ),
+    path(
+        "occurrences/<uuid:pk>/pickup/",
+        OccurrencePickupView.as_view(),
+        name="occurrence-pickup",
+    ),
+    path(
+        "occurrences/<uuid:pk>/postpone/",
+        OccurrencePostponeView.as_view(),
+        name="occurrence-postpone",
     ),
 ]

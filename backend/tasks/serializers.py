@@ -51,6 +51,8 @@ class OccurrenceSerializer(serializers.ModelSerializer):
             "is_cancelled",
             "recurring_task",
             "task_definition",
+            "completed_by",
+            "completed_at",
         ]
         read_only_fields = fields
 

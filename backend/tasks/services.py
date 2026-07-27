@@ -1,4 +1,7 @@
 import datetime
+from zoneinfo import ZoneInfo
+
+from django.utils import timezone
 
 from tasks.models import Occurrence
 
@@ -41,3 +44,44 @@ def ensure_occurrences_for_range(environment, start_date, end_date):
         created += after - before
         day += datetime.timedelta(days=1)
     return created
+
+
+_TERMINAL_STATUSES = {Occurrence.Status.DONE, Occurrence.Status.MISSED}
+
+
+def _target_status(occurrence, today, now_time):
+    """The status this occurrence should have, given local `today` and `now_time`."""
+    if occurrence.status in _TERMINAL_STATUSES:
+        return occurrence.status
+    if occurrence.date < today:
+        return Occurrence.Status.MISSED
+    if (
+        occurrence.status == Occurrence.Status.PENDING
+        and occurrence.date == today
+        and occurrence.time is not None
+        and now_time > occurrence.time
+    ):
+        return Occurrence.Status.LATE
+    return occurrence.status
+
+
+def refresh_statuses(environment, now_dt=None):
+    """Idempotently persist LATE/MISSED transitions using the environment's timezone.
+
+    Returns the number of occurrences whose status changed. DONE/MISSED are
+    terminal and never touched; cancelled occurrences are ignored.
+    """
+    now_dt = now_dt or timezone.now()
+    local_now = now_dt.astimezone(ZoneInfo(environment.timezone))
+    today = local_now.date()
+    now_time = local_now.time()
+
+    qs = environment.occurrences.filter(is_cancelled=False).exclude(status__in=_TERMINAL_STATUSES)
+    updated = 0
+    for occ in qs:
+        target = _target_status(occ, today, now_time)
+        if target != occ.status:
+            occ.status = target
+            occ.save(update_fields=["status"])
+            updated += 1
+    return updated
