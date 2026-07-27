@@ -1,14 +1,21 @@
+import logging
+
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 
 from notifications.models import ActivityEvent
 
+logger = logging.getLogger(__name__)
+
 
 def broadcast_to_environment(environment_id, payload):
     layer = get_channel_layer()
-    async_to_sync(layer.group_send)(
-        f"env_{environment_id}", {"type": "broadcast", "payload": payload}
-    )
+    try:
+        async_to_sync(layer.group_send)(
+            f"env_{environment_id}", {"type": "broadcast", "payload": payload}
+        )
+    except Exception:
+        logger.warning("Failed to broadcast to env %s", environment_id, exc_info=True)
 
 
 def _serialize_event(event):

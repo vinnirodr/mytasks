@@ -20,7 +20,10 @@ class ActivityFeedView(APIView):
             raise Http404
         events = list(environment.activity_events.all()[:FEED_LIMIT])
         last_read = membership.notifications_last_read_at
-        unread_count = sum(1 for e in events if last_read is None or e.created_at > last_read)
+        if last_read is None:
+            unread_count = environment.activity_events.count()
+        else:
+            unread_count = environment.activity_events.filter(created_at__gt=last_read).count()
         results = []
         for e in events:
             data = ActivityEventSerializer(e).data

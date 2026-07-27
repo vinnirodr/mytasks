@@ -44,3 +44,15 @@ async def test_record_activity_creates_event_and_broadcasts():
     assert message["event"]["verb"] == "COMPLETED"
     assert message["event"]["actor_name"] == "Ana"
     await communicator.disconnect()
+
+
+def test_broadcast_is_best_effort_when_layer_fails(monkeypatch):
+    from notifications import services
+
+    class BoomLayer:
+        async def group_send(self, *args, **kwargs):
+            raise RuntimeError("redis down")
+
+    monkeypatch.setattr(services, "get_channel_layer", lambda: BoomLayer())
+    # Must not raise even though the layer errors.
+    services.broadcast_to_environment("env-123", {"kind": "x"})
