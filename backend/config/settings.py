@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     "accounts",
     "environments",
     "tasks",
+    "notifications",
 ]
 
 AUTH_USER_MODEL = "accounts.User"
