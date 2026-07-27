@@ -11,6 +11,8 @@ from rest_framework.views import APIView
 
 from environments.models import Environment
 from environments.permissions import get_membership, is_admin
+from notifications.models import ActivityEvent
+from notifications.services import broadcast_board_update, record_activity
 from tasks.models import Occurrence, RecurringTask, TaskDefinition
 from tasks.presets import get_recommended_tasks
 from tasks.serializers import (
@@ -90,6 +92,7 @@ class RecurringTaskListCreateView(EnvironmentScopedView):
         )
         serializer.is_valid(raise_exception=True)
         serializer.save(environment=environment)
+        record_activity(environment, request.user, ActivityEvent.Verb.AGENDA_CHANGED)
         return Response(serializer.data, status=http_status.HTTP_201_CREATED)
 
 
@@ -109,13 +112,16 @@ class RecurringTaskDetailView(APIView):
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        record_activity(rt.environment, request.user, ActivityEvent.Verb.AGENDA_CHANGED)
         return Response(serializer.data)
 
     def delete(self, request, pk):
         rt = self._get_object(request, pk)
         if not is_admin(request.user, rt.environment):
             raise PermissionDenied("Apenas o ADM pode fazer isso.")
+        environment = rt.environment
         rt.delete()
+        record_activity(environment, request.user, ActivityEvent.Verb.AGENDA_CHANGED)
         return Response(status=http_status.HTTP_204_NO_CONTENT)
 
 
@@ -170,6 +176,9 @@ class OccurrenceListCreateView(EnvironmentScopedView):
             created_by=request.user,
             assignee=request.user,
         )
+        occ = serializer.instance
+        record_activity(occ.environment, request.user, ActivityEvent.Verb.ADDED_TASK, occ)
+        broadcast_board_update(occ)
         return Response(serializer.data, status=http_status.HTTP_201_CREATED)
 
 
@@ -189,6 +198,8 @@ class OccurrenceDetailView(APIView):
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        record_activity(occ.environment, request.user, ActivityEvent.Verb.AGENDA_CHANGED)
+        broadcast_board_update(occ)
         return Response(OccurrenceSerializer(occ).data)
 
 
@@ -201,6 +212,8 @@ class OccurrenceCancelView(APIView):
             raise PermissionDenied("Apenas o ADM pode fazer isso.")
         occ.is_cancelled = True
         occ.save(update_fields=["is_cancelled"])
+        record_activity(occ.environment, request.user, ActivityEvent.Verb.AGENDA_CHANGED)
+        broadcast_board_update(occ)
         return Response({"is_cancelled": True})
 
 
@@ -218,6 +231,8 @@ class OccurrenceCompleteView(APIView):
         occ.completed_by = request.user
         occ.completed_at = timezone.now()
         occ.save(update_fields=["status", "completed_by", "completed_at"])
+        record_activity(occ.environment, request.user, ActivityEvent.Verb.COMPLETED, occ)
+        broadcast_board_update(occ)
         return Response(OccurrenceSerializer(occ).data)
 
 
@@ -240,6 +255,8 @@ class OccurrencePostponeView(APIView):
             )
         occ.status = Occurrence.Status.POSTPONED
         occ.save(update_fields=["status"])
+        record_activity(occ.environment, request.user, ActivityEvent.Verb.POSTPONED, occ)
+        broadcast_board_update(occ)
         return Response(OccurrenceSerializer(occ).data)
 
 
@@ -260,4 +277,6 @@ class OccurrencePickupView(APIView):
             )
         occ.assignee = request.user
         occ.save(update_fields=["assignee"])
+        record_activity(occ.environment, request.user, ActivityEvent.Verb.PICKED_UP, occ)
+        broadcast_board_update(occ)
         return Response(OccurrenceSerializer(occ).data)
