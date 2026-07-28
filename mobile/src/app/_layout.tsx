@@ -16,6 +16,7 @@ import { useColorScheme } from 'react-native';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import AppTabs from '@/components/app-tabs';
+import { AuthProvider } from '@/auth/AuthProvider';
 import { ThemeProvider as AppThemeProvider } from '@/theme/ThemeProvider';
 
 SplashScreen.preventAutoHideAsync();
@@ -39,10 +40,12 @@ export default function TabLayout() {
 
   return (
     <AppThemeProvider>
-      <RouterThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <AnimatedSplashOverlay />
-        <AppTabs />
-      </RouterThemeProvider>
+      <AuthProvider>
+        <RouterThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <AnimatedSplashOverlay />
+          <AppTabs />
+        </RouterThemeProvider>
+      </AuthProvider>
     </AppThemeProvider>
   );
 }
