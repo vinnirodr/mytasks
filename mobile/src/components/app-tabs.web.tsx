@@ -25,7 +25,7 @@ export default function AppTabs() {
             <TabButton>Home</TabButton>
           </TabTrigger>
           <TabTrigger name="explore" href="/explore" asChild>
-            <TabButton>Explore</TabButton>
+            <TabButton>Agenda</TabButton>
           </TabTrigger>
           {/*
             Dev-only design-system gallery (Plan 6a, Task 8) — mirrors the

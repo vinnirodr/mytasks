@@ -1,180 +1,191 @@
-import { Image } from 'expo-image';
-import { SymbolView } from 'expo-symbols';
-import { Platform, Pressable, ScrollView, StyleSheet } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+/**
+ * Organizados — Agenda (2nd tab, read-only)
+ *
+ * Plan 6e, Task 2. Replaces the Expo starter "Explore" screen (docs/design/
+ * handoff/README.md, "9. Agenda") with a read-only weekly view: a `WeekStrip`
+ * of the loaded week + a chronological `AgendaList` of the selected day.
+ *
+ * The route file/name stays `explore.tsx` / `/explore` deliberately — only
+ * the tab *label* changes (`app-tabs.tsx`/`app-tabs.web.tsx`, "Explore" →
+ * "Agenda"). `NativeTabs`/`expo-router/ui Tabs` only register routes
+ * declared as tab triggers (see the 6d-task-6 report), so renaming the file
+ * would mean re-declaring the trigger too — out of scope for this task,
+ * which the brief calls out as the *only* permitted `app-tabs` change.
+ *
+ * No actions here (no complete/postpone/pickup/reassign) — this slice is
+ * strictly read-only; those live on the daily board (`index.tsx`) and
+ * `TaskDetail`.
+ */
 
-import { ExternalLink } from '@/components/external-link';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Collapsible } from '@/components/ui/collapsible';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
+import { useCallback, useMemo, useState } from "react";
+import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function TabTwoScreen() {
-  const safeAreaInsets = useSafeAreaInsets();
-  const insets = {
-    ...safeAreaInsets,
-    bottom: safeAreaInsets.bottom + BottomTabInset + Spacing.three,
-  };
+import { router } from "expo-router";
+
+import { weekStartISO } from "@/api/board";
+import { AgendaList } from "@/components/agenda/AgendaList";
+import { localISO, monthAbbr } from "@/components/agenda/date";
+import { WeekStrip } from "@/components/agenda/WeekStrip";
+import { Button } from "@/components/Button";
+import { Splash } from "@/components/Splash";
+import { Body, Display, Mono } from "@/components/Text";
+import { useActiveEnvironment } from "@/env/useActiveEnvironment";
+import { useAgendaWeek } from "@/env/useAgendaWeek";
+import { useMembers } from "@/env/useMembers";
+import { useTheme } from "@/theme/useTheme";
+
+// ---------------------------------------------------------------------------
+// Screen
+// ---------------------------------------------------------------------------
+
+export default function AgendaScreen() {
   const theme = useTheme();
+  const { colors, spacing } = theme;
 
-  const contentPlatformStyle = Platform.select({
-    android: {
-      paddingTop: insets.top,
-      paddingLeft: insets.left,
-      paddingRight: insets.right,
-      paddingBottom: insets.bottom,
-    },
-    web: {
-      paddingTop: Spacing.six,
-      paddingBottom: Spacing.four,
-    },
-  });
+  const { active, loading: envLoading } = useActiveEnvironment();
+  const { byId } = useMembers(active?.id);
+
+  const [selectedDate, setSelectedDate] = useState(() => new Date());
+  const selectedISO = localISO(selectedDate);
+  const weekStart = useMemo(() => weekStartISO(selectedDate), [selectedDate]);
+
+  const week = useAgendaWeek(active?.id, weekStart);
+
+  const dayOccurrences = useMemo(
+    () => week.occurrences.filter((occurrence) => occurrence.date === selectedISO),
+    [week.occurrences, selectedISO],
+  );
+
+  const handleSelectDay = useCallback((iso: string) => {
+    // `T00:00:00` local (not UTC) keeps the parsed date on the intended
+    // calendar day regardless of device timezone offset.
+    const [year, month, day] = iso.split("-").map(Number);
+    setSelectedDate(new Date(year, (month ?? 1) - 1, day ?? 1));
+  }, []);
+
+  if (envLoading) {
+    return <Splash />;
+  }
+
+  if (!active) {
+    return (
+      <View style={[styles.root, { backgroundColor: colors.bg }]}>
+        <SafeAreaView style={styles.centeredSafeArea}>
+          <View
+            testID="no-environment-cta"
+            style={[styles.emptyState, { paddingHorizontal: spacing.screenX }]}
+          >
+            <Display size={28} style={styles.emptyStateTitle}>
+              Você ainda não participa de um ambiente
+            </Display>
+            <Body color="inkMuted" style={styles.emptyStateBody}>
+              Entre com um código de convite para começar a organizar as tarefas da casa.
+            </Body>
+            <Button title="Entrar com código" onPress={() => router.push("/(auth)/join")} />
+          </View>
+        </SafeAreaView>
+      </View>
+    );
+  }
 
   return (
-    <ScrollView
-      style={[styles.scrollView, { backgroundColor: theme.background }]}
-      contentInset={insets}
-      contentContainerStyle={[styles.contentContainer, contentPlatformStyle]}>
-      <ThemedView style={styles.container}>
-        <ThemedView style={styles.titleContainer}>
-          <ThemedText type="subtitle">Explore</ThemedText>
-          <ThemedText style={styles.centerText} themeColor="textSecondary">
-            This starter app includes example{'\n'}code to help you get started.
-          </ThemedText>
+    <View style={[styles.root, { backgroundColor: colors.bg }]} testID="agenda-screen">
+      <SafeAreaView style={styles.safeArea} edges={["top"]}>
+        <ScrollView
+          contentContainerStyle={[
+            styles.scrollContent,
+            { paddingHorizontal: spacing.screenX, paddingBottom: 140 },
+          ]}
+        >
+          <View style={styles.header}>
+            <Display size={30}>Agenda</Display>
+            <View style={[styles.monthPill, { backgroundColor: colors.surface }]}>
+              <Mono size={11}>{monthAbbr(selectedDate)}</Mono>
+            </View>
+          </View>
 
-          <ExternalLink href="https://docs.expo.dev" asChild>
-            <Pressable style={({ pressed }) => pressed && styles.pressed}>
-              <ThemedView type="backgroundElement" style={styles.linkButton}>
-                <ThemedText type="link">Expo documentation</ThemedText>
-                <SymbolView
-                  tintColor={theme.text}
-                  name={{ ios: 'arrow.up.right.square', android: 'link', web: 'link' }}
-                  size={12}
-                />
-              </ThemedView>
-            </Pressable>
-          </ExternalLink>
-        </ThemedView>
+          <WeekStrip weekStart={weekStart} selectedISO={selectedISO} onSelect={handleSelectDay} />
 
-        <ThemedView style={styles.sectionsWrapper}>
-          <Collapsible title="File-based routing">
-            <ThemedText type="small">
-              This app has two screens: <ThemedText type="code">src/app/index.tsx</ThemedText> and{' '}
-              <ThemedText type="code">src/app/explore.tsx</ThemedText>
-            </ThemedText>
-            <ThemedText type="small">
-              The layout file in <ThemedText type="code">src/app/_layout.tsx</ThemedText> sets up
-              the tab navigator.
-            </ThemedText>
-            <ExternalLink href="https://docs.expo.dev/router/introduction">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
-
-          <Collapsible title="Android, iOS, and web support">
-            <ThemedView type="backgroundElement" style={styles.collapsibleContent}>
-              <ThemedText type="small">
-                You can open this project on Android, iOS, and the web. To open the web version,
-                press <ThemedText type="smallBold">w</ThemedText> in the terminal running this
-                project.
-              </ThemedText>
-              <Image
-                source={require('@/assets/images/tutorial-web.png')}
-                style={styles.imageTutorial}
-              />
-            </ThemedView>
-          </Collapsible>
-
-          <Collapsible title="Images">
-            <ThemedText type="small">
-              For static images, you can use the <ThemedText type="code">@2x</ThemedText> and{' '}
-              <ThemedText type="code">@3x</ThemedText> suffixes to provide files for different
-              screen densities.
-            </ThemedText>
-            <Image source={require('@/assets/images/react-logo.png')} style={styles.imageReact} />
-            <ExternalLink href="https://reactnative.dev/docs/images">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
-
-          <Collapsible title="Light and dark mode components">
-            <ThemedText type="small">
-              This template has light and dark mode support. The{' '}
-              <ThemedText type="code">useColorScheme()</ThemedText> hook lets you inspect what the
-              user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-            </ThemedText>
-            <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-              <ThemedText type="linkPrimary">Learn more</ThemedText>
-            </ExternalLink>
-          </Collapsible>
-
-          <Collapsible title="Animations">
-            <ThemedText type="small">
-              This template includes an example of an animated component. The{' '}
-              <ThemedText type="code">src/components/ui/collapsible.tsx</ThemedText> component uses
-              the powerful <ThemedText type="code">react-native-reanimated</ThemedText> library to
-              animate opening this hint.
-            </ThemedText>
-          </Collapsible>
-        </ThemedView>
-        {Platform.OS === 'web' && <WebBadge />}
-      </ThemedView>
-    </ScrollView>
+          {week.error ? (
+            <View testID="agenda-error" style={styles.stateBlock}>
+              <Body color="inkMuted" style={styles.stateText}>
+                Não foi possível carregar a agenda desta semana.
+              </Body>
+              <Button title="Tentar de novo" variant="outline" onPress={week.refetch} />
+            </View>
+          ) : week.loading && week.occurrences.length === 0 ? (
+            <View testID="agenda-loading" style={styles.stateBlock}>
+              <ActivityIndicator color={colors.forest} />
+            </View>
+          ) : dayOccurrences.length === 0 ? (
+            <View testID="agenda-day-empty" style={styles.stateBlock}>
+              <Display size={22} style={styles.emptyDayTitle}>
+                Nada por aqui
+              </Display>
+              <Body color="inkMuted" style={styles.stateText}>
+                Não há tarefas para este dia.
+              </Body>
+            </View>
+          ) : (
+            <AgendaList occurrences={dayOccurrences} byId={byId} />
+          )}
+        </ScrollView>
+      </SafeAreaView>
+    </View>
   );
 }
 
+// ---------------------------------------------------------------------------
+// Styles
+// ---------------------------------------------------------------------------
+
 const styles = StyleSheet.create({
-  scrollView: {
+  root: {
     flex: 1,
   },
-  contentContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+  safeArea: {
+    flex: 1,
   },
-  container: {
-    maxWidth: MaxContentWidth,
-    flexGrow: 1,
+  centeredSafeArea: {
+    flex: 1,
+    justifyContent: "center",
   },
-  titleContainer: {
-    gap: Spacing.three,
-    alignItems: 'center',
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.six,
+  scrollContent: {
+    paddingTop: 12,
+    gap: 20,
   },
-  centerText: {
-    textAlign: 'center',
+  emptyState: {
+    gap: 14,
+    alignItems: "flex-start",
   },
-  pressed: {
-    opacity: 0.7,
+  emptyStateTitle: {
+    marginBottom: 2,
   },
-  linkButton: {
-    flexDirection: 'row',
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.two,
-    borderRadius: Spacing.five,
-    justifyContent: 'center',
-    gap: Spacing.one,
-    alignItems: 'center',
+  emptyStateBody: {
+    marginBottom: 8,
   },
-  sectionsWrapper: {
-    gap: Spacing.five,
-    paddingHorizontal: Spacing.four,
-    paddingTop: Spacing.three,
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
-  collapsibleContent: {
-    alignItems: 'center',
+  monthPill: {
+    height: 32,
+    paddingHorizontal: 14,
+    borderRadius: 999,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  imageTutorial: {
-    width: '100%',
-    aspectRatio: 296 / 171,
-    borderRadius: Spacing.three,
-    marginTop: Spacing.two,
+  stateBlock: {
+    alignItems: "flex-start",
+    gap: 14,
+    paddingVertical: 24,
   },
-  imageReact: {
-    width: 100,
-    height: 100,
-    alignSelf: 'center',
+  emptyDayTitle: {
+    marginBottom: 2,
+  },
+  stateText: {
+    marginBottom: 4,
   },
 });
