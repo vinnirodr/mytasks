@@ -25,6 +25,7 @@ export type ActiveEnvironmentValue = {
   environments: Environment[];
   active: Environment | null;
   setActive: (id: string) => void;
+  addAndActivate: (env: Environment) => void;
   loading: boolean;
   error: unknown | null;
   reload: () => void;
@@ -127,9 +128,29 @@ export function ActiveEnvironmentProvider({ children }: { children: ReactNode })
     [environments],
   );
 
+  // Used right after `environmentsApi.create()` (CreateEnvModal, Plan 6e Task
+  // 4): the freshly created environment isn't in `environments` yet — a
+  // reload() + setActive(id) pair would race (reload's async list fetch could
+  // resolve after/without the new env, and setActive is a no-op for ids not
+  // already in the list) — so this inserts it locally (if absent) and
+  // activates + persists it directly.
+  const addAndActivate = useCallback((env: Environment) => {
+    setEnvironments((prev) => (prev.some((existing) => existing.id === env.id) ? prev : [...prev, env]));
+    setActiveState(env);
+    void prefsStore.setActiveEnvironmentId(env.id);
+  }, []);
+
   const value = useMemo<ActiveEnvironmentValue>(
-    () => ({ environments, active, setActive, loading, error, reload: () => void load() }),
-    [environments, active, setActive, loading, error, load],
+    () => ({
+      environments,
+      active,
+      setActive,
+      addAndActivate,
+      loading,
+      error,
+      reload: () => void load(),
+    }),
+    [environments, active, setActive, addAndActivate, loading, error, load],
   );
 
   return (

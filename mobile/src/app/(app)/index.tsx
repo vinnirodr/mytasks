@@ -45,6 +45,7 @@ import { boardApi, type Occurrence } from '@/api/board';
 import { useAuth } from '@/auth/useAuth';
 import { Avatar, AvatarStack } from '@/components/Avatar';
 import { Button } from '@/components/Button';
+import { CreateEnvModal } from '@/components/CreateEnvModal';
 import { ProgressRing } from '@/components/ProgressRing';
 import { NewTaskModal } from '@/components/NewTaskModal';
 import { SectionHeader } from '@/components/SectionHeader';
@@ -129,6 +130,10 @@ export default function HomeScreen() {
   // local state instead of a route, for the same tab-navigator reason.
   const [newTaskOpen, setNewTaskOpen] = useState(false);
 
+  // "Criar ambiente" (Task 6e-T4), offered alongside "Entrar com código" in
+  // the no-environment empty state below — same local-state overlay pattern.
+  const [createEnvOpen, setCreateEnvOpen] = useState(false);
+
   // The optimistic change already reverted inside useUndoableComplete (or
   // TaskDetail's own "Concluir" action) by the time this fires — this only
   // surfaces a short, dismissible notice so a failed complete isn't
@@ -176,9 +181,16 @@ export default function HomeScreen() {
             <Body color="inkMuted" style={styles.emptyStateBody}>
               Entre com um código de convite para começar a organizar as tarefas da casa.
             </Body>
-            <Button title="Entrar com código" onPress={() => router.push('/(auth)/join')} />
+            <Button title="Criar ambiente" onPress={() => setCreateEnvOpen(true)} />
+            <Button
+              title="Entrar com código"
+              variant="outline"
+              onPress={() => router.push('/(auth)/join')}
+            />
           </View>
         </SafeAreaView>
+
+        <CreateEnvModal visible={createEnvOpen} onClose={() => setCreateEnvOpen(false)} />
       </View>
     );
   }
