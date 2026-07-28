@@ -2,6 +2,7 @@ import sys
 from pathlib import Path
 
 import environ
+from celery.schedules import crontab
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -90,7 +91,14 @@ CELERY_BROKER_URL = env("REDIS_URL", default="redis://localhost:6379/0")
 CELERY_RESULT_BACKEND = env("REDIS_URL", default="redis://localhost:6379/0")
 CELERY_TASK_ALWAYS_EAGER = _TESTING
 CELERY_TASK_EAGER_PROPAGATES = True
-CELERY_BEAT_SCHEDULE = {}
+CELERY_BEAT_SCHEDULE = {
+    "send-reminders": {"task": "push.tasks.send_reminders_task", "schedule": 60.0},
+    "refresh-statuses": {"task": "push.tasks.refresh_statuses_task", "schedule": 300.0},
+    "materialize-occurrences": {
+        "task": "push.tasks.materialize_occurrences_task",
+        "schedule": crontab(hour=0, minute=5),
+    },
+}
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
