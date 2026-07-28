@@ -27,6 +27,18 @@ export default function AppTabs() {
           renderingMode="template"
         />
       </NativeTabs.Trigger>
+
+      {/*
+        Dev-only design-system gallery (Plan 6a, Task 8). `NativeTabs` only
+        registers routes declared as `<NativeTabs.Trigger>` children — an
+        undeclared `app/ds-gallery.tsx` file would never be reachable via
+        `Link`/`router.push`, so it has to be a real (visible) tab rather
+        than a route the Home screen merely links to.
+      */}
+      <NativeTabs.Trigger name="ds-gallery">
+        <NativeTabs.Trigger.Label>DS</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon sf="paintpalette" md="palette" />
+      </NativeTabs.Trigger>
     </NativeTabs>
   );
 }
