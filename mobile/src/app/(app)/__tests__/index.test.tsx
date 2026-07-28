@@ -389,3 +389,41 @@ test("bell/avatar/FAB placeholders don't crash when pressed", () => {
   fireEvent.press(screen.getByTestId("profile-avatar-button"));
   fireEvent.press(screen.getByTestId("fab-new-task"));
 });
+
+// ---------------------------------------------------------------------------
+// Hosting the TaskDetail modal (Plan 6d, Task 6)
+// ---------------------------------------------------------------------------
+
+describe("task detail hosting", () => {
+  test("tapping a TaskCard opens TaskDetail instead of pushing a route", () => {
+    mockUseBoard.mockReturnValue(
+      staticBoard({
+        occurrences: [occurrence({ id: "today-1", title: "Lavar a louça do almoço" })],
+      }),
+    );
+
+    renderScreen();
+
+    expect(screen.queryByTestId("task-detail-modal")).toBeNull();
+
+    fireEvent.press(screen.getByTestId("task-card-today-1"));
+
+    expect(screen.getByTestId("task-detail-modal")).toBeTruthy();
+    expect(mockPush).not.toHaveBeenCalledWith(expect.stringContaining("/task/"));
+  });
+
+  test("closing TaskDetail clears the selection", () => {
+    mockUseBoard.mockReturnValue(
+      staticBoard({ occurrences: [occurrence({ id: "today-1" })] }),
+    );
+
+    renderScreen();
+
+    fireEvent.press(screen.getByTestId("task-card-today-1"));
+    expect(screen.getByTestId("task-detail-modal")).toBeTruthy();
+
+    fireEvent.press(screen.getByTestId("task-detail-close"));
+
+    expect(screen.queryByTestId("task-detail-modal")).toBeNull();
+  });
+});

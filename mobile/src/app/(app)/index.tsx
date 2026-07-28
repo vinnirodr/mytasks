@@ -13,8 +13,16 @@
  *
  * The bell/avatar/FAB lead to 6e/6f screens that don't exist yet — they're
  * wired to a no-op `comingSoon()` placeholder here rather than a new route.
- * The only new route this task pushes to is `/task/[id]` (T6 builds it);
- * `TaskCard.onPress` already points there.
+ *
+ * Tapping a `TaskCard` (Task 6) opens `TaskDetail` as a `Modal`/overlay
+ * hosted right here, controlled by `selectedOccurrenceId` — NOT a
+ * `router.push` to a `task/[id]` route. The `(app)` group's tab navigators
+ * (`NativeTabs` native / `expo-router/ui Tabs` web) only register routes
+ * declared as tab triggers, so a sibling detail route wouldn't be reachable
+ * without restructuring the tabs (deferred to 6e/6f) — see the 6d-task-6
+ * report for the full rationale. `TaskDetail` shares this screen's
+ * `BoardProvider` state directly (via its own `useBoard()`), so actions
+ * taken inside it are already reflected here once it closes.
  */
 
 import { useCallback, useState } from 'react';
@@ -32,6 +40,7 @@ import { ProgressRing } from '@/components/ProgressRing';
 import { SectionHeader } from '@/components/SectionHeader';
 import { Splash } from '@/components/Splash';
 import { TaskCard } from '@/components/TaskCard';
+import { TaskDetail } from '@/components/TaskDetail';
 import { Body, Display, Mono, Text } from '@/components/Text';
 import { useActiveEnvironment } from '@/env/useActiveEnvironment';
 import { useBoard } from '@/env/useBoard';
@@ -89,18 +98,6 @@ function presenceLabel(count: number): string {
  */
 function comingSoon() {}
 
-/**
- * Navigates to the task-detail route. `/task/[id]` doesn't exist yet (T6
- * builds it) — expo-router's typed routes only know about routes that
- * exist on disk, so `router.push` would reject this literal template path
- * at compile time until then. The cast is the documented escape hatch for
- * exactly that "route arrives in a later task" situation; drop it once T6
- * lands and this path is a recognized typed route.
- */
-function goToTaskDetail(occurrenceId: string) {
-  router.push(`/task/${occurrenceId}` as Parameters<typeof router.push>[0]);
-}
-
 // ---------------------------------------------------------------------------
 // Screen
 // ---------------------------------------------------------------------------
@@ -113,9 +110,17 @@ export default function HomeScreen() {
   const board = useBoard();
   const { members, byId } = useMembers(active?.id);
 
-  // The optimistic change already reverted inside useUndoableComplete by the
-  // time this fires — this only surfaces a short, dismissible notice so a
-  // failed complete isn't indistinguishable from a silent bug.
+  // The overlay a tapped `TaskCard` opens — `TaskDetail` (Task 6) shares
+  // this screen's `BoardProvider` state, so it's hosted here rather than
+  // pushed as a route (see the file header for why).
+  const [selectedOccurrenceId, setSelectedOccurrenceId] = useState<string | null>(null);
+
+  // The optimistic change already reverted inside useUndoableComplete (or
+  // TaskDetail's own "Concluir" action) by the time this fires — this only
+  // surfaces a short, dismissible notice so a failed complete isn't
+  // indistinguishable from a silent bug. Shared between the board's own
+  // checkbox-complete flow and TaskDetail's "Concluir", since both are the
+  // same user-facing action and error.
   const [completeError, setCompleteError] = useState(false);
 
   const handleUndoError = useCallback(() => {
@@ -336,7 +341,7 @@ export default function HomeScreen() {
                       occurrence={occurrence}
                       member={occurrence.assignee ? byId.get(occurrence.assignee) : undefined}
                       onToggleComplete={() => handleToggleComplete(occurrence)}
-                      onPress={() => goToTaskDetail(occurrence.id)}
+                      onPress={() => setSelectedOccurrenceId(occurrence.id)}
                     />
                   ))}
                 </View>
@@ -350,7 +355,7 @@ export default function HomeScreen() {
                     occurrence={occurrence}
                     member={occurrence.assignee ? byId.get(occurrence.assignee) : undefined}
                     onToggleComplete={() => handleToggleComplete(occurrence)}
-                    onPress={() => goToTaskDetail(occurrence.id)}
+                    onPress={() => setSelectedOccurrenceId(occurrence.id)}
                   />
                 ))}
               </View>
@@ -381,6 +386,12 @@ export default function HomeScreen() {
           </Text>
         </Pressable>
       </View>
+
+      <TaskDetail
+        occurrenceId={selectedOccurrenceId}
+        onClose={() => setSelectedOccurrenceId(null)}
+        onCompleteError={handleUndoError}
+      />
     </View>
   );
 }
