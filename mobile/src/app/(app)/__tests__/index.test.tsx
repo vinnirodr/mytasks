@@ -95,6 +95,7 @@ function staticBoard(overrides: Partial<BoardValue> = {}): BoardValue {
     error: null,
     refetch: jest.fn(),
     applyLocal: jest.fn(),
+    connected: false,
     ...overrides,
   };
 }
@@ -112,6 +113,7 @@ function useLiveBoard(initial: Occurrence[]) {
     refetch: jest.fn(),
     applyLocal: (updater: (prev: Occurrence[]) => Occurrence[]) =>
       setOccurrences((prev) => updater(prev)),
+    connected: false,
   };
 }
 
@@ -198,6 +200,23 @@ test("hides the Atrasadas section when there are no late occurrences", () => {
 
   expect(screen.queryByText("Atrasadas")).toBeNull();
   expect(screen.getByText("Hoje")).toBeTruthy();
+});
+
+// ---------------------------------------------------------------------------
+// Live WS indicator (Plan 6d, Task 7)
+// ---------------------------------------------------------------------------
+
+test("the hero's live dot reflects board.connected", () => {
+  mockUseBoard.mockReturnValue(staticBoard({ connected: false }));
+  const disconnected = renderScreen();
+  const disconnectedStyle = disconnected.getByTestId("live-dot").props.style;
+  disconnected.unmount();
+
+  mockUseBoard.mockReturnValue(staticBoard({ connected: true }));
+  const connected = renderScreen();
+  const connectedStyle = connected.getByTestId("live-dot").props.style;
+
+  expect(connectedStyle).not.toEqual(disconnectedStyle);
 });
 
 // ---------------------------------------------------------------------------

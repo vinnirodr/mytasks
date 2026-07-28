@@ -23,6 +23,11 @@
  * report for the full rationale. `TaskDetail` shares this screen's
  * `BoardProvider` state directly (via its own `useBoard()`), so actions
  * taken inside it are already reflected here once it closes.
+ *
+ * The hero's presence-row dot (Task 7) reads `useBoard().connected`. It's
+ * still a placeholder for real presence (no such backend concept exists
+ * yet), but it's now honest about the board's WebSocket state: full `live`
+ * color when connected, dimmed/neutral otherwise.
  */
 
 import { useCallback, useState } from 'react';
@@ -267,7 +272,16 @@ export default function HomeScreen() {
                 {presenceLabel(members.length)}
               </Body>
               <View style={styles.liveDotHalo}>
-                <View style={[styles.liveDot, { backgroundColor: colors.live }]} />
+                <View
+                  testID="live-dot"
+                  style={[
+                    styles.liveDot,
+                    {
+                      backgroundColor: board.connected ? colors.live : colors.forestSoft,
+                      opacity: board.connected ? 1 : 0.45,
+                    },
+                  ]}
+                />
               </View>
             </View>
           </View>

@@ -6,6 +6,12 @@
  * atrasadas/hoje sections — with the board screen (T5), task detail (T6),
  * and the live-WS wiring (T7). `applyLocal` lets those consumers patch
  * `occurrences` in place (optimistic updates, WS patches) without a refetch.
+ *
+ * Task 7 also subscribes this same state to the environment's WebSocket (via
+ * `useBoardSocket`) for as long as `active` is set — its `board_update`/
+ * `activity` handling and `connected` state are documented in
+ * `useBoardSocket.ts`. `connected` is exposed on `BoardValue` for the hero's
+ * live dot (`app/(app)/index.tsx`).
  */
 
 import {
@@ -21,6 +27,7 @@ import {
 import { boardApi, todayISO, type Occurrence } from "@/api/board";
 
 import { useActiveEnvironment } from "./useActiveEnvironment";
+import { useBoardSocket } from "./useBoardSocket";
 
 export type HeroStats = { done: number; total: number; pct: number };
 export type BoardSections = { atrasadas: Occurrence[]; hoje: Occurrence[] };
@@ -34,6 +41,8 @@ export type BoardValue = {
   error: unknown | null;
   refetch: () => void;
   applyLocal: (updater: (prev: Occurrence[]) => Occurrence[]) => void;
+  /** Live state of the environment WebSocket (T7) — drives the hero's live dot. */
+  connected: boolean;
 };
 
 export const BoardContext = createContext<BoardValue | null>(null);
@@ -136,6 +145,13 @@ export function BoardProvider({ children }: { children: ReactNode }) {
     setOccurrences((prev) => updater(prev));
   }, []);
 
+  const { connected } = useBoardSocket({
+    envId: active?.id,
+    occurrences,
+    applyLocal,
+    refetch,
+  });
+
   const derived = useMemo(() => deriveBoard(occurrences), [occurrences]);
 
   const value = useMemo<BoardValue>(
@@ -147,8 +163,9 @@ export function BoardProvider({ children }: { children: ReactNode }) {
       error,
       refetch,
       applyLocal,
+      connected,
     }),
-    [occurrences, derived, loading, error, refetch, applyLocal],
+    [occurrences, derived, loading, error, refetch, applyLocal, connected],
   );
 
   return <BoardContext.Provider value={value}>{children}</BoardContext.Provider>;

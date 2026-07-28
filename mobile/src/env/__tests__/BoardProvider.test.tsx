@@ -3,12 +3,20 @@ import { Text } from "react-native";
 
 import { boardApi, todayISO, type Occurrence } from "@/api/board";
 import type { Environment } from "@/api/environments";
+import { createEnvironmentSocket, type SocketHandlers } from "@/api/socket";
+import { tokenStore } from "@/api/tokenStore";
 
 import { BoardProvider, deriveBoard } from "../BoardProvider";
 import { useActiveEnvironment } from "../useActiveEnvironment";
 import { useBoard } from "../useBoard";
 
 jest.mock("@/api/board");
+jest.mock("@/api/socket", () => ({
+  createEnvironmentSocket: jest.fn(),
+}));
+jest.mock("@/api/tokenStore", () => ({
+  tokenStore: { getAccess: jest.fn() },
+}));
 jest.mock("../useActiveEnvironment", () => ({
   useActiveEnvironment: jest.fn(),
 }));
@@ -16,6 +24,7 @@ jest.mock("../useActiveEnvironment", () => ({
 const mockGetBoard = boardApi.getBoard as jest.Mock;
 const mockTodayISO = todayISO as jest.Mock;
 const mockUseActiveEnvironment = useActiveEnvironment as jest.Mock;
+const mockCreateSocket = createEnvironmentSocket as jest.Mock;
 
 const env: Environment = {
   id: "env-a",
@@ -58,6 +67,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   latest = undefined;
   mockTodayISO.mockReturnValue("2026-07-28");
+  mockCreateSocket.mockReturnValue({ close: jest.fn() });
 });
 
 describe("deriveBoard (pure derivation)", () => {
@@ -327,6 +337,223 @@ describe("BoardProvider", () => {
     });
 
     expect(latest?.occurrences).toEqual([occurrence({ id: "3" })]);
+  });
+
+  test("opens the environment socket for the active environment and exposes `connected` via onOpen/onClose", async () => {
+    mockUseActiveEnvironment.mockReturnValue({ active: env });
+    mockGetBoard.mockResolvedValue([occurrence({ id: "1" })]);
+
+    render(
+      <BoardProvider>
+        <Probe />
+      </BoardProvider>,
+    );
+
+    await waitFor(() => {
+      expect(latest?.loading).toBe(false);
+    });
+
+    expect(mockCreateSocket).toHaveBeenCalledWith(
+      "env-a",
+      tokenStore.getAccess,
+      expect.objectContaining({
+        onMessage: expect.any(Function),
+        onOpen: expect.any(Function),
+        onClose: expect.any(Function),
+      }),
+    );
+    expect(latest?.connected).toBe(false);
+
+    const handlers = mockCreateSocket.mock.calls[0]![2] as SocketHandlers;
+
+    act(() => {
+      handlers.onOpen?.();
+    });
+    expect(latest?.connected).toBe(true);
+
+    act(() => {
+      handlers.onClose?.();
+    });
+    expect(latest?.connected).toBe(false);
+  });
+
+  test("does not open a socket when there is no active environment", async () => {
+    mockUseActiveEnvironment.mockReturnValue({ active: null });
+
+    render(
+      <BoardProvider>
+        <Probe />
+      </BoardProvider>,
+    );
+
+    await waitFor(() => {
+      expect(latest?.loading).toBe(false);
+    });
+
+    expect(mockCreateSocket).not.toHaveBeenCalled();
+    expect(latest?.connected).toBe(false);
+  });
+
+  test("closes the previous socket and opens a new one when the active environment id changes", async () => {
+    const closeA = jest.fn();
+    const closeB = jest.fn();
+    mockCreateSocket.mockReturnValueOnce({ close: closeA }).mockReturnValueOnce({ close: closeB });
+
+    const envB: Environment = { ...env, id: "env-b" };
+    mockUseActiveEnvironment.mockReturnValue({ active: env });
+    mockGetBoard.mockResolvedValue([occurrence({ id: "1" })]);
+
+    const { rerender } = render(
+      <BoardProvider>
+        <Probe />
+      </BoardProvider>,
+    );
+
+    await waitFor(() => {
+      expect(latest?.loading).toBe(false);
+    });
+
+    expect(mockCreateSocket).toHaveBeenCalledTimes(1);
+
+    mockUseActiveEnvironment.mockReturnValue({ active: envB });
+    mockGetBoard.mockResolvedValue([occurrence({ id: "2" }), occurrence({ id: "3" })]);
+
+    rerender(
+      <BoardProvider>
+        <Probe />
+      </BoardProvider>,
+    );
+
+    await waitFor(() => {
+      expect(latest?.occurrences).toHaveLength(2);
+    });
+
+    expect(closeA).toHaveBeenCalledTimes(1);
+    expect(mockCreateSocket).toHaveBeenCalledTimes(2);
+    expect(mockCreateSocket.mock.calls[1]![0]).toBe("env-b");
+  });
+
+  test("closes the socket on unmount", async () => {
+    const close = jest.fn();
+    mockCreateSocket.mockReturnValue({ close });
+    mockUseActiveEnvironment.mockReturnValue({ active: env });
+    mockGetBoard.mockResolvedValue([occurrence({ id: "1" })]);
+
+    const { unmount } = render(
+      <BoardProvider>
+        <Probe />
+      </BoardProvider>,
+    );
+
+    await waitFor(() => {
+      expect(latest?.loading).toBe(false);
+    });
+
+    expect(close).not.toHaveBeenCalled();
+    unmount();
+    expect(close).toHaveBeenCalledTimes(1);
+  });
+
+  test("a `board_update` for a present occurrence patches only its status, without a refetch", async () => {
+    let handlers: SocketHandlers | undefined;
+    mockCreateSocket.mockImplementation((_envId, _getToken, h: SocketHandlers) => {
+      handlers = h;
+      return { close: jest.fn() };
+    });
+    mockUseActiveEnvironment.mockReturnValue({ active: env });
+    mockGetBoard.mockResolvedValue([
+      occurrence({ id: "1", status: "PENDING" }),
+      occurrence({ id: "2", status: "PENDING" }),
+    ]);
+
+    render(
+      <BoardProvider>
+        <Probe />
+      </BoardProvider>,
+    );
+
+    await waitFor(() => {
+      expect(latest?.occurrences).toHaveLength(2);
+    });
+
+    mockGetBoard.mockClear();
+
+    act(() => {
+      handlers!.onMessage({ kind: "board_update", occurrence_id: "1", status: "DONE" });
+    });
+
+    expect(latest?.occurrences.find((o) => o.id === "1")!.status).toBe("DONE");
+    expect(latest?.occurrences.find((o) => o.id === "2")!.status).toBe("PENDING");
+    expect(mockGetBoard).not.toHaveBeenCalled();
+  });
+
+  test("a `board_update` for an unknown occurrence_id triggers a debounced refetch", async () => {
+    jest.useFakeTimers({ doNotFake: ["queueMicrotask"] });
+    let handlers: SocketHandlers | undefined;
+    mockCreateSocket.mockImplementation((_envId, _getToken, h: SocketHandlers) => {
+      handlers = h;
+      return { close: jest.fn() };
+    });
+    mockUseActiveEnvironment.mockReturnValue({ active: env });
+    mockGetBoard.mockResolvedValue([occurrence({ id: "1" })]);
+
+    render(
+      <BoardProvider>
+        <Probe />
+      </BoardProvider>,
+    );
+
+    await waitFor(() => {
+      expect(latest?.occurrences).toHaveLength(1);
+    });
+
+    mockGetBoard.mockClear();
+    mockGetBoard.mockResolvedValue([occurrence({ id: "1" }), occurrence({ id: "new" })]);
+
+    act(() => {
+      handlers!.onMessage({ kind: "board_update", occurrence_id: "new", status: "PENDING" });
+    });
+
+    expect(mockGetBoard).not.toHaveBeenCalled();
+
+    await act(async () => {
+      jest.advanceTimersByTime(300);
+      await Promise.resolve();
+    });
+
+    expect(mockGetBoard).toHaveBeenCalledTimes(1);
+
+    jest.useRealTimers();
+  });
+
+  test("an `activity` message does not mutate occurrences", async () => {
+    let handlers: SocketHandlers | undefined;
+    mockCreateSocket.mockImplementation((_envId, _getToken, h: SocketHandlers) => {
+      handlers = h;
+      return { close: jest.fn() };
+    });
+    mockUseActiveEnvironment.mockReturnValue({ active: env });
+    const occ = occurrence({ id: "1", status: "PENDING" });
+    mockGetBoard.mockResolvedValue([occ]);
+
+    render(
+      <BoardProvider>
+        <Probe />
+      </BoardProvider>,
+    );
+
+    await waitFor(() => {
+      expect(latest?.occurrences).toHaveLength(1);
+    });
+
+    mockGetBoard.mockClear();
+
+    act(() => {
+      handlers!.onMessage({ kind: "activity", event: { type: "task_completed" } });
+    });
+
+    expect(latest?.occurrences).toEqual([occ]);
+    expect(mockGetBoard).not.toHaveBeenCalled();
   });
 
   test("useBoard throws when used outside the provider", () => {
