@@ -6,12 +6,18 @@ from rest_framework import mixins, viewsets
 from rest_framework import status as http_status
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from environments.models import Environment, Invitation, Membership
 from environments.permissions import IsEnvironmentAdmin, IsEnvironmentMember, is_admin
 from environments.serializers import EnvironmentSerializer, InvitationSerializer
+
+
+def initials(name):
+    letters = [c for c in name if c.isalpha()][:2]
+    return "".join(letters).upper()
 
 
 class EnvironmentViewSet(
@@ -83,5 +89,33 @@ class AcceptInvitationView(APIView):
 
         return Response(
             {"environment_id": str(invitation.environment_id), "role": membership.role},
+            status=http_status.HTTP_200_OK,
+        )
+
+
+class InvitationPreviewView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, token):
+        invitation = get_object_or_404(Invitation, token=token)
+        environment = invitation.environment
+        members = [
+            {
+                "display_name": membership.user.display_name or membership.user.email,
+                "initials": initials(membership.user.display_name or membership.user.email),
+            }
+            for membership in environment.memberships.filter(status=Membership.Status.ACTIVE)
+        ]
+        return Response(
+            {
+                "environment_name": environment.name,
+                "env_type": environment.env_type,
+                "member_count": environment.memberships.count(),
+                "members": members,
+                "invited_by_name": invitation.invited_by.display_name
+                or invitation.invited_by.email,
+                "status": invitation.status,
+                "email": invitation.email,
+            },
             status=http_status.HTTP_200_OK,
         )
