@@ -59,6 +59,16 @@ async function getBoard(envId: string, date: string): Promise<Occurrence[]> {
   return response.map(mapOccurrence);
 }
 
+async function getWeek(envId: string, weekOf: string): Promise<Occurrence[]> {
+  const response = await apiClient.request<OccurrenceResponse[]>(
+    `/api/environments/${envId}/occurrences/?week_of=${weekOf}`,
+    { method: "GET" },
+  );
+
+  // Preserve the server's order (date, time) — do not re-sort.
+  return response.map(mapOccurrence);
+}
+
 async function completeOccurrence(id: string): Promise<Occurrence> {
   const response = await apiClient.request<OccurrenceResponse>(`/api/occurrences/${id}/complete/`, {
     method: "POST",
@@ -104,8 +114,25 @@ export function todayISO(): string {
   return `${year}-${month}-${day}`;
 }
 
+// Local Monday (zero-padded YYYY-MM-DD) of the week containing `date` (or today).
+// Deliberately local, not toISOString() (UTC) — see todayISO() above. getDay() is
+// 0=Sun..6=Sat; remapped to Mon=0..Sun=6 so Monday itself needs no adjustment and
+// Sunday rolls back 6 days. Subtracting via the Date constructor's day component
+// lets JS itself carry the month/year rollover instead of hand-rolled arithmetic.
+export function weekStartISO(date: Date = new Date()): string {
+  const mondayOffset = (date.getDay() + 6) % 7;
+  const monday = new Date(date.getFullYear(), date.getMonth(), date.getDate() - mondayOffset);
+
+  const year = monday.getFullYear();
+  const month = String(monday.getMonth() + 1).padStart(2, "0");
+  const day = String(monday.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
 export const boardApi = {
   getBoard,
+  getWeek,
   completeOccurrence,
   pickupOccurrence,
   postponeOccurrence,

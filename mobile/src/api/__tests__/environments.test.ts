@@ -65,4 +65,39 @@ describe("environmentsApi", () => {
       await expect(environmentsApi.list()).rejects.toThrow("network down");
     });
   });
+
+  describe("create", () => {
+    test("posts name + env_type (camelCase envType mapped to snake_case) and maps the returned environment", async () => {
+      mockRequest.mockResolvedValueOnce({
+        id: "env-3",
+        name: "Casa Nova",
+        env_type: "HOUSE",
+        timezone: "America/Sao_Paulo",
+        role: "ADMIN",
+      });
+
+      const result = await environmentsApi.create({ name: "Casa Nova", envType: "HOUSE" });
+
+      expect(mockRequest).toHaveBeenCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledWith("/api/environments/", {
+        method: "POST",
+        body: { name: "Casa Nova", env_type: "HOUSE" },
+      });
+
+      expect(result).toEqual({
+        id: "env-3",
+        name: "Casa Nova",
+        envType: "HOUSE",
+        timezone: "America/Sao_Paulo",
+        role: "ADMIN",
+      });
+    });
+
+    test("propagates the error when apiClient.request rejects", async () => {
+      const error = new Error("network down");
+      mockRequest.mockRejectedValueOnce(error);
+
+      await expect(environmentsApi.create({ name: "Casa Nova", envType: "HOUSE" })).rejects.toThrow("network down");
+    });
+  });
 });
