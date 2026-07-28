@@ -4,7 +4,12 @@ import { Text } from "react-native";
 
 import type { Occurrence } from "@/api/board";
 
-import { moveToEndAsDone, restoreOccurrence, useUndoableComplete } from "../useUndoableComplete";
+import {
+  applyServerOccurrence,
+  moveToEndAsDone,
+  restoreOccurrence,
+  useUndoableComplete,
+} from "../useUndoableComplete";
 
 function occurrence(overrides: Partial<Occurrence> = {}): Occurrence {
   return {
@@ -50,6 +55,33 @@ describe("restoreOccurrence (pure)", () => {
 
     expect(result.map((o) => o.id)).toEqual(["a", "b", "c"]);
     expect(result[0]!.status).toBe("PENDING");
+  });
+});
+
+describe("applyServerOccurrence (pure)", () => {
+  test("replaces the matching occurrence in place, without reordering", () => {
+    const list = [
+      occurrence({ id: "b" }),
+      occurrence({ id: "c" }),
+      occurrence({ id: "a", status: "DONE", completedAt: "2026-07-28T10:00:00.000Z" }),
+    ];
+    const serverOccurrence = occurrence({
+      id: "a",
+      status: "DONE",
+      completedAt: "2026-07-28T10:00:03.000Z",
+      completedBy: "user-9",
+    });
+
+    const result = applyServerOccurrence(list, serverOccurrence);
+
+    expect(result.map((o) => o.id)).toEqual(["b", "c", "a"]);
+    expect(result[2]).toBe(serverOccurrence);
+  });
+
+  test("is a no-op when the occurrence is no longer present", () => {
+    const list = [occurrence({ id: "b" })];
+    const result = applyServerOccurrence(list, occurrence({ id: "a", status: "DONE" }));
+    expect(result).toBe(list);
   });
 });
 
@@ -194,4 +226,116 @@ test("completing an already-DONE occurrence is a no-op", () => {
 
   expect(getHarness().getPending()).toBeNull();
   expect(getHarness().getOccurrences().map((o) => o.id)).toEqual(["a", "b", "c"]);
+});
+
+test("on success, the server's canonical occurrence replaces the optimistic guess in state", async () => {
+  const serverOccurrence = occurrence({
+    id: "a",
+    status: "DONE",
+    completedAt: "2026-07-28T12:34:00.000Z",
+    completedBy: "user-9",
+  });
+  const completeOccurrence = jest.fn().mockResolvedValue(serverOccurrence);
+  const getHarness = renderHook(completeOccurrence);
+
+  act(() => {
+    getHarness().complete(occurrence({ id: "a" }));
+  });
+
+  await act(async () => {
+    jest.advanceTimersByTime(5000);
+    // Let the resolved promise's .then() microtask settle.
+    await Promise.resolve();
+    await Promise.resolve();
+  });
+
+  const applied = getHarness().getOccurrences().find((item) => item.id === "a");
+  expect(applied).toEqual(serverOccurrence);
+});
+
+// ---------------------------------------------------------------------------
+// Only one pending undo at a time (findings from the task-5 review)
+// ---------------------------------------------------------------------------
+
+test("completing a second item while one is pending flushes the first immediately, then the second after its own delay", async () => {
+  const completeOccurrence = jest.fn().mockResolvedValue(occurrence({ id: "x", status: "DONE" }));
+  const getHarness = renderHook(completeOccurrence);
+
+  act(() => {
+    getHarness().complete(occurrence({ id: "a" }));
+  });
+
+  act(() => {
+    jest.advanceTimersByTime(2000);
+  });
+
+  // Completing "b" while "a" is still within its undo window should settle
+  // "a" right away (send its API call now) rather than drop it silently.
+  act(() => {
+    getHarness().complete(occurrence({ id: "b" }));
+  });
+
+  expect(completeOccurrence).toHaveBeenCalledTimes(1);
+  expect(completeOccurrence).toHaveBeenNthCalledWith(1, "a");
+
+  // "b" hasn't hit its own 5s window yet.
+  expect(completeOccurrence).not.toHaveBeenCalledWith("b");
+  expect(getHarness().getPending()).toEqual({ occurrenceId: "b", title: "Regar as plantas" });
+
+  await act(async () => {
+    jest.advanceTimersByTime(5000);
+  });
+
+  expect(completeOccurrence).toHaveBeenCalledTimes(2);
+  expect(completeOccurrence).toHaveBeenNthCalledWith(2, "b");
+  expect(getHarness().getPending()).toBeNull();
+});
+
+test("unmounting while a completion is pending flushes it instead of dropping it", () => {
+  const completeOccurrence = jest.fn().mockResolvedValue(occurrence({ id: "a", status: "DONE" }));
+  let harness: Harness | undefined;
+
+  function Probe() {
+    const [state, setState] = useState([
+      occurrence({ id: "a" }),
+      occurrence({ id: "b" }),
+      occurrence({ id: "c" }),
+    ]);
+
+    const applyLocal = (updater: (prev: Occurrence[]) => Occurrence[]) => {
+      setState((prev) => updater(prev));
+    };
+
+    const controller = useUndoableComplete({
+      occurrences: state,
+      applyLocal,
+      completeOccurrence,
+    });
+
+    harness = {
+      getOccurrences: () => state,
+      getPending: () => controller.pending,
+      complete: controller.complete,
+      undo: controller.undo,
+    };
+
+    return <Text testID="probe">{controller.pending ? "pending" : "idle"}</Text>;
+  }
+
+  const view = render(<Probe />);
+
+  act(() => {
+    harness!.complete(occurrence({ id: "a" }));
+  });
+
+  expect(completeOccurrence).not.toHaveBeenCalled();
+
+  act(() => {
+    view.unmount();
+  });
+
+  // The undo window is moot once unmounted — the pending completion is sent
+  // immediately rather than silently dropped (which would leave it
+  // optimistically DONE locally but never persisted server-side).
+  expect(completeOccurrence).toHaveBeenCalledWith("a");
 });

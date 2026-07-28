@@ -315,7 +315,7 @@ describe("completing a task", () => {
     expect(screen.queryByText("Desfazer")).toBeNull();
   });
 
-  test("an API error reverts the optimistic completion", async () => {
+  test("an API error reverts the optimistic completion and shows a dismissible notice", async () => {
     mockCompleteOccurrence.mockRejectedValue(new Error("network down"));
     mockUseBoard.mockImplementation(() =>
       useLiveBoard([occurrence({ id: "a", title: "Regar as plantas", status: "PENDING" })]),
@@ -336,6 +336,45 @@ describe("completing a task", () => {
     await waitFor(() => expect(screen.queryByText("Desfazer")).toBeNull());
     expect(mockCompleteOccurrence).toHaveBeenCalledWith("a");
     expect(screen.getByText("Regar as plantas")).toBeTruthy();
+
+    // The missing-feedback finding: a failed completion must not be silent.
+    expect(screen.getByTestId("complete-error-banner")).toBeTruthy();
+    expect(screen.getByText("Não foi possível concluir. Tente de novo.")).toBeTruthy();
+
+    fireEvent.press(screen.getByTestId("complete-error-dismiss"));
+    expect(screen.queryByTestId("complete-error-banner")).toBeNull();
+  });
+
+  test("retrying a completion clears a stale error notice", async () => {
+    mockCompleteOccurrence.mockRejectedValueOnce(new Error("network down"));
+    mockUseBoard.mockImplementation(() =>
+      useLiveBoard([
+        occurrence({ id: "a", title: "Regar as plantas", status: "PENDING" }),
+        occurrence({ id: "b", title: "Lavar a louça", status: "PENDING" }),
+      ]),
+    );
+
+    renderScreen();
+
+    act(() => {
+      fireEvent.press(screen.getAllByTestId("task-checkbox")[0]!);
+    });
+
+    await act(async () => {
+      jest.advanceTimersByTime(5000);
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(screen.getByTestId("complete-error-banner")).toBeTruthy();
+
+    mockCompleteOccurrence.mockResolvedValueOnce(occurrence({ id: "b", status: "DONE" }));
+
+    act(() => {
+      fireEvent.press(screen.getAllByTestId("task-checkbox")[0]!);
+    });
+
+    expect(screen.queryByTestId("complete-error-banner")).toBeNull();
   });
 });
 

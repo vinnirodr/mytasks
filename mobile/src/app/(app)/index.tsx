@@ -17,14 +17,14 @@
  * `TaskCard.onPress` already points there.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 
-import { boardApi } from '@/api/board';
+import { boardApi, type Occurrence } from '@/api/board';
 import { useAuth } from '@/auth/useAuth';
 import { Avatar, AvatarStack } from '@/components/Avatar';
 import { Button } from '@/components/Button';
@@ -113,9 +113,13 @@ export default function HomeScreen() {
   const board = useBoard();
   const { members, byId } = useMembers(active?.id);
 
+  // The optimistic change already reverted inside useUndoableComplete by the
+  // time this fires — this only surfaces a short, dismissible notice so a
+  // failed complete isn't indistinguishable from a silent bug.
+  const [completeError, setCompleteError] = useState(false);
+
   const handleUndoError = useCallback(() => {
-    // The optimistic change already reverted inside useUndoableComplete;
-    // the board's own error/refetch affordance covers recovery from here.
+    setCompleteError(true);
   }, []);
 
   const { pending, complete, undo } = useUndoableComplete({
@@ -124,6 +128,16 @@ export default function HomeScreen() {
     completeOccurrence: boardApi.completeOccurrence,
     onError: handleUndoError,
   });
+
+  // Clear a stale failure notice when the user tries completing again, so it
+  // doesn't linger next to a brand-new "Desfazer" banner.
+  const handleToggleComplete = useCallback(
+    (occurrence: Occurrence) => {
+      setCompleteError(false);
+      complete(occurrence);
+    },
+    [complete],
+  );
 
   if (envLoading) {
     return <Splash />;
@@ -231,7 +245,7 @@ export default function HomeScreen() {
               </ProgressRing>
             </View>
 
-            <View style={styles.heroDivider} />
+            <View style={[styles.heroDivider, { backgroundColor: colors.onForest }]} />
 
             <View style={styles.presenceRow}>
               <AvatarStack
@@ -263,6 +277,26 @@ export default function HomeScreen() {
                 <Text variant="bodyStrong" size={14} color="tangerine">
                   Desfazer
                 </Text>
+              </Pressable>
+            </View>
+          ) : null}
+
+          {completeError ? (
+            <View
+              testID="complete-error-banner"
+              style={[styles.undoBanner, { backgroundColor: colors.dangerBg, borderColor: colors.danger }]}
+            >
+              <Body size={14} color="danger" style={styles.completeErrorText}>
+                Não foi possível concluir. Tente de novo.
+              </Body>
+              <Pressable
+                testID="complete-error-dismiss"
+                accessibilityRole="button"
+                accessibilityLabel="Dispensar aviso"
+                onPress={() => setCompleteError(false)}
+                hitSlop={8}
+              >
+                <MaterialIcons name="close" size={18} color={colors.danger} />
               </Pressable>
             </View>
           ) : null}
@@ -301,7 +335,7 @@ export default function HomeScreen() {
                       key={occurrence.id}
                       occurrence={occurrence}
                       member={occurrence.assignee ? byId.get(occurrence.assignee) : undefined}
-                      onToggleComplete={() => complete(occurrence)}
+                      onToggleComplete={() => handleToggleComplete(occurrence)}
                       onPress={() => goToTaskDetail(occurrence.id)}
                     />
                   ))}
@@ -315,7 +349,7 @@ export default function HomeScreen() {
                     key={occurrence.id}
                     occurrence={occurrence}
                     member={occurrence.assignee ? byId.get(occurrence.assignee) : undefined}
-                    onToggleComplete={() => complete(occurrence)}
+                    onToggleComplete={() => handleToggleComplete(occurrence)}
                     onPress={() => goToTaskDetail(occurrence.id)}
                   />
                 ))}
@@ -428,7 +462,10 @@ const styles = StyleSheet.create({
   },
   heroDivider: {
     height: 1,
-    backgroundColor: 'rgba(242,237,228,0.14)',
+    // `onForest` at ~14% opacity per the handoff — kept as a token color +
+    // separate `opacity` (matching ProgressRing's `trackOpacity` pattern)
+    // rather than a hand-rolled rgba() literal.
+    opacity: 0.14,
   },
   presenceRow: {
     flexDirection: 'row',
@@ -458,6 +495,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingVertical: 12,
     paddingHorizontal: 16,
+  },
+  completeErrorText: {
+    flex: 1,
+    marginRight: 12,
   },
   stateBlock: {
     alignItems: 'flex-start',

@@ -12,7 +12,10 @@
  *     banner. The real `completeOccurrence(id)` call is *delayed* by that
  *     same 5s — calling `undo()` before it fires cancels the timer and
  *     reverts the optimistic change instead of ever hitting the API.
- *  3. If the delayed call fails (network error, etc.), the optimistic change
+ *  3. On success, the server's canonical `Occurrence` (authoritative status/
+ *     completedAt/completedBy) replaces the client's optimistic guess via
+ *     the same `applyLocal` path (see `applyServerOccurrence`).
+ *  4. If the delayed call fails (network error, etc.), the optimistic change
  *     is reverted the same way `undo()` would, and `onError` fires so the
  *     screen can show a short notice.
  *
@@ -64,6 +67,22 @@ export function restoreOccurrence(occurrences: Occurrence[], snapshot: UndoSnaps
   return [...withoutIt.slice(0, insertAt), snapshot.occurrence, ...withoutIt.slice(insertAt)];
 }
 
+/**
+ * Replaces the occurrence matching `serverOccurrence.id` with the server's
+ * canonical version, in place — no reordering, since the optimistic move to
+ * the end of the list already happened in `moveToEndAsDone`. A no-op if the
+ * occurrence is no longer present (e.g. a refetch already replaced the list).
+ */
+export function applyServerOccurrence(
+  occurrences: Occurrence[],
+  serverOccurrence: Occurrence,
+): Occurrence[] {
+  const index = occurrences.findIndex((item) => item.id === serverOccurrence.id);
+  if (index === -1) return occurrences;
+
+  return [...occurrences.slice(0, index), serverOccurrence, ...occurrences.slice(index + 1)];
+}
+
 // ---------------------------------------------------------------------------
 // Hook
 // ---------------------------------------------------------------------------
@@ -104,10 +123,17 @@ export function useUndoableComplete({
 
   const send = useCallback(
     (snapshot: UndoSnapshot) => {
-      completeOccurrence(snapshot.id).catch(() => {
-        applyLocal((prev) => restoreOccurrence(prev, snapshot));
-        onError?.();
-      });
+      completeOccurrence(snapshot.id)
+        .then((serverOccurrence) => {
+          // Apply the server's authoritative status/completedAt/completedBy
+          // over the client's optimistic guess (which only set status=DONE
+          // and a client-side completedAt timestamp).
+          applyLocal((prev) => applyServerOccurrence(prev, serverOccurrence));
+        })
+        .catch(() => {
+          applyLocal((prev) => restoreOccurrence(prev, snapshot));
+          onError?.();
+        });
     },
     [applyLocal, completeOccurrence, onError],
   );
