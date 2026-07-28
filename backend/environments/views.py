@@ -48,6 +48,31 @@ class EnvironmentViewSet(
         )
         serializer.instance = env
 
+    @action(detail=True, methods=["get"], url_path="members")
+    def members(self, request, pk=None):
+        environment = self.get_object()  # runs IsEnvironmentMember object check
+        memberships = environment.memberships.filter(
+            status=Membership.Status.ACTIVE
+        ).select_related("user")
+        data = [
+            {
+                "id": str(membership.id),
+                "user_id": str(membership.user_id),
+                "display_name": membership.user.display_name or membership.user.email,
+                "initials": initials(membership.user.display_name or membership.user.email),
+                "role": membership.role,
+                "is_me": membership.user_id == request.user.id,
+            }
+            for membership in memberships
+        ]
+        data.sort(
+            key=lambda entry: (
+                entry["role"] != Membership.Role.ADMIN,
+                entry["display_name"].lower(),
+            )
+        )
+        return Response(data)
+
     @action(detail=True, methods=["post"], url_path="invitations")
     def invitations(self, request, pk=None):
         environment = self.get_object()  # runs IsEnvironmentMember object check

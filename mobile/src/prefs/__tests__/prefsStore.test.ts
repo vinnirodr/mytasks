@@ -25,3 +25,19 @@ test("getOnboardingSeen returns true after setOnboardingSeen", async () => {
 test("getOnboardingSeen returns false when unset", async () => {
   await expect(prefsStore.getOnboardingSeen()).resolves.toBe(false);
 });
+
+test("setActiveEnvironmentId writes the id to the active-environment key", async () => {
+  await prefsStore.setActiveEnvironmentId("env-1");
+
+  await expect(AsyncStorage.getItem("org.activeEnvironmentId")).resolves.toBe("env-1");
+});
+
+test("getActiveEnvironmentId returns the persisted id after setActiveEnvironmentId", async () => {
+  await prefsStore.setActiveEnvironmentId("env-1");
+
+  await expect(prefsStore.getActiveEnvironmentId()).resolves.toBe("env-1");
+});
+
+test("getActiveEnvironmentId returns null when unset", async () => {
+  await expect(prefsStore.getActiveEnvironmentId()).resolves.toBeNull();
+});
