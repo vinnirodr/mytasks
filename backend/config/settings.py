@@ -85,6 +85,12 @@ else:
         }
     }
 
+CELERY_BROKER_URL = env("REDIS_URL", default="redis://localhost:6379/0")
+CELERY_RESULT_BACKEND = env("REDIS_URL", default="redis://localhost:6379/0")
+CELERY_TASK_ALWAYS_EAGER = _TESTING
+CELERY_TASK_EAGER_PROPAGATES = True
+CELERY_BEAT_SCHEDULE = {}
+
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
 ]
