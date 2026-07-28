@@ -53,6 +53,7 @@ Finish 6d: dispatch the final whole-branch review, then open the PR for `feat/mo
 - **Absent-id refetch** on `board_update` does a full replace that can transiently clobber a *different* occurrence's in-flight optimistic-complete (5s undo window); self-heals. Narrow it (merge instead of replace, or skip during active optimistic windows).
 - **LATE checkbox not danger-toned**: handoff wants the late card's checkbox ring in `danger`, but `TaskCheckbox` has no danger state (card conveys via `dangerBg` + danger metadata). Add a danger variant to `TaskCheckbox` for full fidelity.
 - Minor: task-detail `Modal` `visible` never toggles false (closes by unmount → no slide-out animation); `useMembers` fetched independently by board + detail (no shared cache).
+- Minor (final-review): board shows the empty state ("Nada para hoje 🎉") for one frame before the spinner because `BoardProvider` inits `loading=false` → init `loading=true` or add a first-load flag; add day `overlaySoft`/`scrim` tokens so `TaskDetail`/`MemberPickerSheet` stop using literal rgba; `useUndoableComplete`'s unmount-flush can `setState` after unmount on sign-out (dev warning only); `TaskDetail` action error-revert restores a whole click-time snapshot (edge race, self-heals on refetch).
 
 **Mobile (earlier):**
 - Invite deep-link is unreachable for **already-signed-in** users (invite/join routes live under `(auth)`; the guard mounts only one group) → move to a shared route or make reachable in both.
