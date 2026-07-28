@@ -18,18 +18,16 @@ import {
   radius,
   shadow,
   spacing,
+  type ResolvedColors,
 } from "./tokens";
+
+// Re-exported so call sites (e.g. TextField.tsx) can keep importing the
+// resolved-palette type from the theme module rather than reaching into
+// tokens.ts directly.
+export type { ResolvedColors };
 
 export type ThemeMode = "light" | "dark";
 export type ThemeOverride = "system" | ThemeMode;
-
-// NOTE: tokens.ts exports a `ColorTokens` umbrella type defined as
-// `typeof lightColors & typeof darkColors`. Because most keys (e.g. `bg`)
-// hold different literal string values in each palette, that intersection
-// collapses to `never` and is unusable as the type of a *resolved* color
-// object. The correct shape for "whichever palette is active" is a union,
-// not an intersection, so we type it that way here instead.
-export type ResolvedColors = typeof lightColors | typeof darkColors;
 
 export type ThemeContextValue = {
   mode: ThemeMode;

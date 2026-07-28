@@ -16,7 +16,7 @@
 import type { ReactNode } from "react";
 import { Text as RNText, type TextProps as RNTextProps, type TextStyle } from "react-native";
 
-import { darkColors, lightColors } from "@/theme/tokens";
+import { type ColorKey } from "@/theme/tokens";
 import { useTheme } from "@/theme/useTheme";
 
 // ---------------------------------------------------------------------------
@@ -25,18 +25,8 @@ import { useTheme } from "@/theme/useTheme";
 
 export type TextVariant = "display" | "title" | "body" | "bodyStrong" | "caption" | "mono";
 
-/**
- * A known theme color-token key, or a raw hex/rgba string used as-is.
- *
- * NOTE: this is `keyof typeof lightColors | keyof typeof darkColors` (a
- * union of two plain key sets), not `keyof ColorTokens` — the latter is
- * `keyof (typeof lightColors & typeof darkColors)`, and intersecting two
- * object types whose overlapping properties collapse to `never` makes
- * TypeScript's `keyof` fall back to `string | number | symbol` instead of
- * the expected string-literal union. `ColorTokens` in tokens.ts remains
- * useful as a *value* umbrella type; it isn't safe to `keyof`.
- */
-export type TextColor = keyof typeof lightColors | keyof typeof darkColors | (string & {});
+/** A known theme color-token key, or a raw hex/rgba string used as-is. */
+export type TextColor = ColorKey | (string & {});
 
 export type TextProps = Omit<RNTextProps, "children"> & {
   variant?: TextVariant;

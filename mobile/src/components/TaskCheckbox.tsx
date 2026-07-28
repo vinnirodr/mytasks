@@ -47,8 +47,10 @@ export function TaskCheckbox({ state, onToggle, size = DEFAULT_SIZE }: TaskCheck
   // there's no dedicated ring hex, so `ink-faint` stands in as the nearest
   // "quiet outline" tone for both the idle and deferred rings.
   const ringColor = isDark ? darkColors.inkFaint : lightColors.checkboxIdle;
-  const doneBg = isDark ? darkColors.butter : lightColors.forest;
-  const doneCheckColor = isDark ? darkColors.butterInk : lightColors.onForest;
+  // `accent` is the only night accent (incl. "concluído") per the handoff —
+  // night done fill is no longer butter.
+  const doneBg = isDark ? darkColors.accent : lightColors.forest;
+  const doneCheckColor = isDark ? darkColors.onAccent : lightColors.onForest;
 
   return (
     <Pressable

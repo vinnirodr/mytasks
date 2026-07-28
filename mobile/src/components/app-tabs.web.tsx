@@ -27,6 +27,15 @@ export default function AppTabs() {
           <TabTrigger name="explore" href="/explore" asChild>
             <TabButton>Explore</TabButton>
           </TabTrigger>
+          {/*
+            Dev-only design-system gallery (Plan 6a, Task 8) — mirrors the
+            native `<NativeTabs.Trigger name="ds-gallery">` in app-tabs.tsx.
+            Without a matching web trigger, expo-router/ui has no route for
+            "ds-gallery" and /ds-gallery redirects to home on web.
+          */}
+          <TabTrigger name="ds-gallery" href="/ds-gallery" asChild>
+            <TabButton>DS</TabButton>
+          </TabTrigger>
         </CustomTabList>
       </TabList>
     </Tabs>

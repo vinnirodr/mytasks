@@ -15,6 +15,7 @@ import { Pressable, StyleSheet, View } from "react-native";
 
 import { MaterialIcons } from "@expo/vector-icons";
 
+import { darkColors } from "@/theme/tokens";
 import { useTheme } from "@/theme/useTheme";
 
 import { Text } from "./Text";
@@ -57,6 +58,12 @@ export function BottomNav({ activeKey, onChange }: BottomNavProps) {
   const theme = useTheme();
   const { colors, heights, radius, shadow, isDark, action, onAction } = theme;
 
+  // Night active pill is a creme pill (`navActive`) with dark (`bg`) text,
+  // not the accent-yellow action color (docs/design/handoff/README.md,
+  // "Navegação"). Day keeps the forest pill via `action`/`onAction`.
+  const activePillBg = isDark ? darkColors.navActive : action;
+  const activeContentColor = isDark ? colors.bg : onAction;
+
   return (
     <View
       style={[
@@ -72,7 +79,7 @@ export function BottomNav({ activeKey, onChange }: BottomNavProps) {
     >
       {TABS.map((tab) => {
         const active = tab.key === activeKey;
-        const color = active ? onAction : colors.inkMuted;
+        const color = active ? activeContentColor : colors.inkMuted;
 
         return (
           <Pressable
@@ -89,7 +96,7 @@ export function BottomNav({ activeKey, onChange }: BottomNavProps) {
                     height: 44,
                     paddingHorizontal: 16,
                     borderRadius: radius.pill,
-                    backgroundColor: action,
+                    backgroundColor: activePillBg,
                   }
                 : { flexDirection: "column" as const, gap: 3 },
             ]}
@@ -116,5 +123,6 @@ const styles = StyleSheet.create({
   tab: {
     alignItems: "center",
     justifyContent: "center",
+    minHeight: 44,
   },
 });

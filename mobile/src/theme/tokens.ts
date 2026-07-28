@@ -70,10 +70,16 @@ export const darkColors = {
   butterInk: lightColors.butterInk,
 } as const;
 
-// Umbrella type covering every color token key used across both themes
-// (day-only keys like `checkboxIdle` and night-only keys like `accent` are
-// both included), so a theme consumer can type against "any known token".
-export type ColorTokens = typeof lightColors & typeof darkColors;
+// `ResolvedColors` is "whichever palette is currently active" — a union, not
+// an intersection. (An intersection would collapse to `never` for every key
+// whose light/dark values differ, e.g. `bg`, since TypeScript can't inhabit
+// a type that must simultaneously equal two different string literals.)
+export type ResolvedColors = typeof lightColors | typeof darkColors;
+
+// Every color token key used across either theme (day-only keys like
+// `checkboxIdle` and night-only keys like `accent` are both included), for
+// call sites that need to name a token key without holding a resolved value.
+export type ColorKey = keyof typeof lightColors | keyof typeof darkColors;
 
 // ---------------------------------------------------------------------------
 // Spacing

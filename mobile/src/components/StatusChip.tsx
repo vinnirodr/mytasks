@@ -11,6 +11,7 @@ import { View } from "react-native";
 
 import { MaterialIcons } from "@expo/vector-icons";
 
+import { darkColors } from "@/theme/tokens";
 import { useTheme } from "@/theme/useTheme";
 
 import { Mono } from "./Text";
@@ -61,8 +62,10 @@ export function StatusChip({ status }: StatusChipProps) {
       break;
     }
     case "done": {
-      backgroundColor = isDark ? colors.butter : colors.forest;
-      textColor = isDark ? colors.butterInk : colors.onForest;
+      // `accent` is the only night accent (incl. "concluído") per the
+      // handoff — night done fill is no longer butter.
+      backgroundColor = isDark ? darkColors.accent : colors.forest;
+      textColor = isDark ? darkColors.onAccent : colors.onForest;
       bordered = false;
       break;
     }

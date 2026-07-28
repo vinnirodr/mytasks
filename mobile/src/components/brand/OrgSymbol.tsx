@@ -16,7 +16,7 @@
  */
 
 import { useEffect } from "react";
-import { Svg, Path, type PathProps } from "react-native-svg";
+import { Svg, Path, G, type GProps } from "react-native-svg";
 import Animated, {
   Easing,
   useAnimatedProps,
@@ -24,6 +24,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
+import { darkColors, lightColors } from "@/theme/tokens";
 import { useTheme } from "@/theme/useTheme";
 
 // ---------------------------------------------------------------------------
@@ -37,10 +38,14 @@ const DEFAULT_SIZE = 44;
 const LEFT_D = "M22 6a16 16 0 0 0 0 32";
 const RIGHT_D = "M22 6a16 16 0 0 1 0 32";
 
-const LIGHT_LEFT = "#123B2E"; // forest
-const LIGHT_RIGHT = "#FF5A2B"; // tangerine
-const DARK_LEFT = "#F2EDE4"; // creme
-const DARK_RIGHT = "#FFD65A"; // manteiga
+// Day: forest / tangerine. Night: creme / manteiga — `onForest` and `butter`
+// carry the same hexes at night (tokens.ts, "Day-theme keys kept..."), so
+// the night constants are read off `darkColors` for the same values without
+// restating the hex literals.
+const LIGHT_LEFT = lightColors.forest;
+const LIGHT_RIGHT = lightColors.tangerine;
+const DARK_LEFT = darkColors.onForest; // creme
+const DARK_RIGHT = darkColors.butter; // manteiga
 
 const MONO_FADED_OPACITY = 0.45;
 
@@ -48,7 +53,7 @@ const ENTER_OFFSET_X = 7;
 const MEET_DURATION = 420;
 const MEET_EASING = Easing.bezier(0.2, 0.8, 0.2, 1);
 
-const AnimatedPath = Animated.createAnimatedComponent(Path);
+const AnimatedG = Animated.createAnimatedComponent(G);
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -110,36 +115,57 @@ export function OrgSymbol({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [animated, animationKey]);
 
-  const leftAnimatedProps = useAnimatedProps<Partial<PathProps>>(() => ({
-    translateX: leftX.value,
+  // SVG-native transform (a `transform` string on a wrapping `<G>`), not a
+  // bare `translateX` on the `<Path>` itself — react-native-svg-web forwards
+  // unrecognized/deprecated shape props straight to the DOM element, and
+  // `translateX` isn't a real SVG or DOM attribute, so it used to trigger
+  // "React does not recognize the `translateX` prop" on web. `transform` is
+  // a genuine SVG presentation attribute, so it round-trips cleanly there.
+  const leftAnimatedProps = useAnimatedProps<Partial<GProps>>(() => ({
+    transform: `translate(${leftX.value}, 0)`,
   }));
-  const rightAnimatedProps = useAnimatedProps<Partial<PathProps>>(() => ({
-    translateX: rightX.value,
+  const rightAnimatedProps = useAnimatedProps<Partial<GProps>>(() => ({
+    transform: `translate(${rightX.value}, 0)`,
   }));
 
   const leftColor = mono ? theme.colors.ink : theme.isDark ? DARK_LEFT : LIGHT_LEFT;
   const rightColor = mono ? theme.colors.ink : theme.isDark ? DARK_RIGHT : LIGHT_RIGHT;
 
+  const leftPath = (
+    <Path
+      testID="org-symbol-left"
+      d={LEFT_D}
+      stroke={leftColor}
+      strokeWidth={strokeWidth}
+      strokeLinecap="round"
+      opacity={1}
+    />
+  );
+
+  const rightPath = (
+    <Path
+      testID="org-symbol-right"
+      d={RIGHT_D}
+      stroke={rightColor}
+      strokeWidth={strokeWidth}
+      strokeLinecap="round"
+      opacity={mono ? MONO_FADED_OPACITY : 1}
+    />
+  );
+
   return (
     <Svg width={renderedSize} height={renderedSize} viewBox={VIEW_BOX} fill="none">
-      <AnimatedPath
-        testID="org-symbol-left"
-        d={LEFT_D}
-        stroke={leftColor}
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
-        opacity={1}
-        animatedProps={leftAnimatedProps}
-      />
-      <AnimatedPath
-        testID="org-symbol-right"
-        d={RIGHT_D}
-        stroke={rightColor}
-        strokeWidth={strokeWidth}
-        strokeLinecap="round"
-        opacity={mono ? MONO_FADED_OPACITY : 1}
-        animatedProps={rightAnimatedProps}
-      />
+      {/*
+        Static (non-animated) symbols — the four gallery instances included —
+        render the plain `<Path>` with no `animatedProps` at all, so they
+        never receive the animation machinery in the first place.
+      */}
+      {animated ? <AnimatedG animatedProps={leftAnimatedProps}>{leftPath}</AnimatedG> : leftPath}
+      {animated ? (
+        <AnimatedG animatedProps={rightAnimatedProps}>{rightPath}</AnimatedG>
+      ) : (
+        rightPath
+      )}
     </Svg>
   );
 }
