@@ -11,3 +11,5 @@ channels-redis==4.3.0
 daphne==4.2.3
 cbor2==5.6.5
 pytest-asyncio==1.4.0
+celery==5.6.3
+requests==2.34.2

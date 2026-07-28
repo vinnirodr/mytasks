@@ -82,6 +82,7 @@ class Occurrence(models.Model):
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING)
     is_cancelled = models.BooleanField(default=False)
     is_one_off = models.BooleanField(default=False)
+    reminder_sent = models.BooleanField(default=False)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
