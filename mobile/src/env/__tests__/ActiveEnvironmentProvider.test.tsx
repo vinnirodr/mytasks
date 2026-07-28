@@ -210,6 +210,42 @@ describe("ActiveEnvironmentProvider", () => {
     expect(mockList).toHaveBeenCalledTimes(2);
   });
 
+  test("ignores a stale reload() response that resolves after a newer one (race guard)", async () => {
+    let resolveFirst: (value: Environment[]) => void = () => {};
+    const firstPromise = new Promise<Environment[]>((resolve) => {
+      resolveFirst = resolve;
+    });
+    mockList.mockReturnValueOnce(firstPromise);
+    mockGetActiveEnvironmentId.mockResolvedValue(null);
+
+    render(
+      <ActiveEnvironmentProvider>
+        <Probe />
+      </ActiveEnvironmentProvider>,
+    );
+
+    // reload() fires a second request before the initial mount request resolves.
+    mockList.mockResolvedValueOnce([envA, envB]);
+
+    await act(async () => {
+      latest?.reload();
+      await Promise.resolve();
+    });
+
+    await waitFor(() => {
+      expect(latest?.environments).toEqual([envA, envB]);
+    });
+
+    // the stale initial-mount response resolves late — it must not overwrite reload()'s state.
+    await act(async () => {
+      resolveFirst([envA]);
+      await Promise.resolve();
+    });
+
+    expect(latest?.environments).toEqual([envA, envB]);
+    expect(latest?.loading).toBe(false);
+  });
+
   test("useActiveEnvironment throws when used outside the provider", () => {
     const consoleError = jest.spyOn(console, "error").mockImplementation(() => {});
     expect(() => render(<Probe />)).toThrow(/ActiveEnvironmentProvider/);

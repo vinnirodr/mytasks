@@ -8,7 +8,15 @@
  * `occurrences` in place (optimistic updates, WS patches) without a refetch.
  */
 
-import { createContext, useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 
 import { boardApi, todayISO, type Occurrence } from "@/api/board";
 
@@ -65,16 +73,37 @@ export function BoardProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<unknown | null>(null);
 
+  // Race guard: `load` is invoked both by the effect below (on active.id
+  // change) and imperatively by `refetch()`. Whichever call is most recent
+  // "owns" `guardRef.current` — starting a new load cancels whatever request
+  // was previously in flight, so a slow/superseded response can never
+  // overwrite state a newer request already produced. Mirrors the
+  // `cancelled`-flag convention in AuthProvider's bootstrap effect, adapted
+  // to a shared ref since this loader has more than one call site.
+  const guardRef = useRef<{ cancelled: boolean } | null>(null);
+
   const load = useCallback(async (envId: string) => {
+    if (guardRef.current) {
+      guardRef.current.cancelled = true;
+    }
+    const guard = { cancelled: false };
+    guardRef.current = guard;
+
     setLoading(true);
     setError(null);
     try {
       const result = await boardApi.getBoard(envId, todayISO());
-      setOccurrences(result);
+      if (!guard.cancelled) {
+        setOccurrences(result);
+      }
     } catch (err) {
-      setError(err);
+      if (!guard.cancelled) {
+        setError(err);
+      }
     } finally {
-      setLoading(false);
+      if (!guard.cancelled) {
+        setLoading(false);
+      }
     }
   }, []);
 
@@ -82,10 +111,19 @@ export function BoardProvider({ children }: { children: ReactNode }) {
     if (active) {
       void load(active.id);
     } else {
+      if (guardRef.current) {
+        guardRef.current.cancelled = true;
+      }
       setOccurrences([]);
       setError(null);
       setLoading(false);
     }
+
+    return () => {
+      if (guardRef.current) {
+        guardRef.current.cancelled = true;
+      }
+    };
   }, [active?.id, load]);
 
   const refetch = useCallback(() => {

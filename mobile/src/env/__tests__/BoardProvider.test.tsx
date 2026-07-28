@@ -246,6 +246,89 @@ describe("BoardProvider", () => {
     expect(mockGetBoard).toHaveBeenLastCalledWith("env-b", "2026-07-28");
   });
 
+  test("ignores a stale response for a superseded environment id (race guard)", async () => {
+    const envB: Environment = { ...env, id: "env-b" };
+    let resolveFirst: (value: Occurrence[]) => void = () => {};
+    const firstPromise = new Promise<Occurrence[]>((resolve) => {
+      resolveFirst = resolve;
+    });
+
+    mockUseActiveEnvironment.mockReturnValue({ active: env });
+    mockGetBoard.mockReturnValueOnce(firstPromise);
+
+    const { rerender } = render(
+      <BoardProvider>
+        <Probe />
+      </BoardProvider>,
+    );
+
+    // active environment changes to envB before the env-a request resolves.
+    mockUseActiveEnvironment.mockReturnValue({ active: envB });
+    mockGetBoard.mockResolvedValueOnce([occurrence({ id: "2" })]);
+
+    rerender(
+      <BoardProvider>
+        <Probe />
+      </BoardProvider>,
+    );
+
+    await waitFor(() => {
+      expect(latest?.occurrences).toEqual([occurrence({ id: "2" })]);
+    });
+
+    // the stale env-a response resolves late — it must not overwrite env-b's state.
+    await act(async () => {
+      resolveFirst([occurrence({ id: "1" })]);
+      await Promise.resolve();
+    });
+
+    expect(latest?.occurrences).toEqual([occurrence({ id: "2" })]);
+    expect(latest?.loading).toBe(false);
+  });
+
+  test("ignores a stale refetch() response that resolves after a newer refetch()", async () => {
+    mockUseActiveEnvironment.mockReturnValue({ active: env });
+    mockGetBoard.mockResolvedValue([occurrence({ id: "0" })]);
+
+    render(
+      <BoardProvider>
+        <Probe />
+      </BoardProvider>,
+    );
+
+    await waitFor(() => {
+      expect(latest?.loading).toBe(false);
+    });
+
+    let resolveFirstRefetch: (value: Occurrence[]) => void = () => {};
+    const firstRefetchPromise = new Promise<Occurrence[]>((resolve) => {
+      resolveFirstRefetch = resolve;
+    });
+    mockGetBoard.mockReturnValueOnce(firstRefetchPromise);
+
+    act(() => {
+      latest?.refetch();
+    });
+
+    mockGetBoard.mockResolvedValueOnce([occurrence({ id: "3" })]);
+
+    await act(async () => {
+      latest?.refetch();
+      await Promise.resolve();
+    });
+
+    await waitFor(() => {
+      expect(latest?.occurrences).toEqual([occurrence({ id: "3" })]);
+    });
+
+    await act(async () => {
+      resolveFirstRefetch([occurrence({ id: "1" })]);
+      await Promise.resolve();
+    });
+
+    expect(latest?.occurrences).toEqual([occurrence({ id: "3" })]);
+  });
+
   test("useBoard throws when used outside the provider", () => {
     const consoleError = jest.spyOn(console, "error").mockImplementation(() => {});
     expect(() => render(<Probe />)).toThrow(/BoardProvider/);

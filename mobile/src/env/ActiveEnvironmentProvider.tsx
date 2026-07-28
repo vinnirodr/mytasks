@@ -8,7 +8,15 @@
  * the live-WS wiring (T7) all read/switch environment from one place.
  */
 
-import { createContext, useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 
 import { environmentsApi, type Environment } from "@/api/environments";
 import { prefsStore } from "@/prefs/prefsStore";
@@ -53,13 +61,32 @@ export function ActiveEnvironmentProvider({ children }: { children: ReactNode })
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<unknown | null>(null);
 
+  // Race guard: `load` is invoked both by the mount effect below and
+  // imperatively by `reload()`. Whichever call is most recent "owns"
+  // `guardRef.current` — starting a new load cancels whatever request was
+  // previously in flight, so a slow/superseded response can never overwrite
+  // state a newer request already produced. Mirrors the `cancelled`-flag
+  // convention in AuthProvider's bootstrap effect, adapted to a shared ref
+  // since this loader has more than one call site.
+  const guardRef = useRef<{ cancelled: boolean } | null>(null);
+
   const load = useCallback(async () => {
+    if (guardRef.current) {
+      guardRef.current.cancelled = true;
+    }
+    const guard = { cancelled: false };
+    guardRef.current = guard;
+
     setLoading(true);
     setError(null);
     try {
       const list = await environmentsApi.list();
       const persistedId = await prefsStore.getActiveEnvironmentId();
       const nextActive = pickActiveEnvironment(list, persistedId);
+
+      if (guard.cancelled) {
+        return;
+      }
 
       setEnvironments(list);
       setActiveState(nextActive);
@@ -68,14 +95,24 @@ export function ActiveEnvironmentProvider({ children }: { children: ReactNode })
         await prefsStore.setActiveEnvironmentId(nextActive.id);
       }
     } catch (err) {
-      setError(err);
+      if (!guard.cancelled) {
+        setError(err);
+      }
     } finally {
-      setLoading(false);
+      if (!guard.cancelled) {
+        setLoading(false);
+      }
     }
   }, []);
 
   useEffect(() => {
     void load();
+
+    return () => {
+      if (guardRef.current) {
+        guardRef.current.cancelled = true;
+      }
+    };
   }, [load]);
 
   const setActive = useCallback(
