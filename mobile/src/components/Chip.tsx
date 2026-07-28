@@ -31,13 +31,14 @@ export type ChipProps = {
   onPress?: () => void;
   variant?: ChipVariant;
   icon?: IconName;
+  testID?: string;
 };
 
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
-export function Chip({ label, selected = false, onPress, variant = "person", icon }: ChipProps) {
+export function Chip({ label, selected = false, onPress, variant = "person", icon, testID }: ChipProps) {
   const theme = useTheme();
   const { colors, heights, radius, isDark, action, onAction } = theme;
 
@@ -53,6 +54,7 @@ export function Chip({ label, selected = false, onPress, variant = "person", ico
 
     return (
       <Pressable
+        testID={testID}
         accessibilityRole="button"
         accessibilityState={{ selected }}
         onPress={onPress}
@@ -84,6 +86,7 @@ export function Chip({ label, selected = false, onPress, variant = "person", ico
 
   return (
     <Pressable
+      testID={testID}
       accessibilityRole="button"
       accessibilityState={{ selected }}
       onPress={onPress}

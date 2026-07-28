@@ -401,12 +401,38 @@ describe("completing a task", () => {
 // Placeholder actions
 // ---------------------------------------------------------------------------
 
-test("bell/avatar/FAB placeholders don't crash when pressed", () => {
+test("bell/avatar placeholders don't crash when pressed", () => {
   renderScreen();
 
   fireEvent.press(screen.getByTestId("notifications-button"));
   fireEvent.press(screen.getByTestId("profile-avatar-button"));
-  fireEvent.press(screen.getByTestId("fab-new-task"));
+});
+
+// ---------------------------------------------------------------------------
+// Hosting the NewTaskModal (Plan 6e, Task 3) — the FAB no longer no-ops
+// ---------------------------------------------------------------------------
+
+describe("new task modal hosting", () => {
+  test("tapping the FAB opens NewTaskModal", () => {
+    renderScreen();
+
+    expect(screen.queryByTestId("new-task-modal")).toBeNull();
+
+    fireEvent.press(screen.getByTestId("fab-new-task"));
+
+    expect(screen.getByTestId("new-task-modal")).toBeTruthy();
+  });
+
+  test("closing NewTaskModal clears the open state", () => {
+    renderScreen();
+
+    fireEvent.press(screen.getByTestId("fab-new-task"));
+    expect(screen.getByTestId("new-task-modal")).toBeTruthy();
+
+    fireEvent.press(screen.getByTestId("new-task-close"));
+
+    expect(screen.queryByTestId("new-task-modal")).toBeNull();
+  });
 });
 
 // ---------------------------------------------------------------------------
