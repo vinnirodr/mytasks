@@ -1,6 +1,6 @@
 # Organizados — Project Status & Resume
 
-**Last updated:** 2026-07-28 · **One-liner:** Backend MVP is 100% done and merged; the Expo app (Plan 6) is past half — 6a/6b/6c merged; **6d (daily board + task detail + actions + live-WS client) is code-complete on `feat/mobile-daily-board`, web-verified day+night with a real backend, pending final review + PR**; **6e (agenda + new-task + create-environment) is next**.
+**Last updated:** 2026-07-28 · **One-liner:** Backend MVP is 100% done and merged; the Expo app (Plan 6) is ~80% — 6a/6b/6c/6d merged; **6e (agenda + new-task 2-step + create-environment) is code-complete on `feat/mobile-agenda`, web-verified day+night with a real backend, pending final review + PR**; **6f (environments/members/profile/bell + push-token) is the last slice**.
 
 > New session? Read this + the auto-loaded memory. To continue: **merge the open PR, then start the next slice's plan** (see "Next").
 
@@ -16,9 +16,9 @@
 | **6a** | Mobile design-system foundation (fonts, day/night tokens, theme, brand, components) | ✅ merged |
 | **6b** | Mobile API/WS client + JWT/secure-store + auth screens (splash/login/register) | ✅ merged |
 | **6c** | Mobile onboarding + accept-invite (+ backend invite-preview endpoint) | ✅ merged (PR #8) |
-| **6d** | Daily board + task detail + complete/defer/pickup + **live WebSocket** | 🔵 **branch `feat/mobile-daily-board` — final review** |
-| **6e** | Agenda (week view) + new-task (recurring, 2-step) + create-environment | ⬜ **NEXT** |
-| **6f** | Environments/members/profile/bell screens + Expo push-token registration | ⬜ pending |
+| **6d** | Daily board + task detail + complete/defer/pickup + **live WebSocket** | ✅ merged (PR #9) |
+| **6e** | Agenda (week view) + new-task (recurring, 2-step) + create-environment | 🔵 **branch `feat/mobile-agenda` — final review** |
+| **6f** | Environments/members/profile/bell screens + Expo push-token registration | ⬜ **NEXT** |
 
 PRs: #1 foundations · #2 agenda/occurrences · #3 daily board · #4 live layer · #5 push · #6 mobile 6a · #7 mobile 6b · #8 mobile 6c (open). Repo: `github.com/vinnirodr/mytasks`.
 
@@ -30,11 +30,13 @@ PRs: #1 foundations · #2 agenda/occurrences · #3 daily board · #4 live layer 
 - Verification: subagents + **Expo Web** visual check (no Xcode on this Intel Mac → no iOS simulator; web ≈ iOS, not pixel-identical). iOS-pixel QA + push testing need the user's Xcode/device.
 - Full design spec of tokens + all 18 screens: `docs/design/handoff/README.md` (+ `prototipo.html`).
 
-## What's next (6e)
+## What's next (6f)
 
-Finish 6d: dispatch the final whole-branch review, then open the PR for `feat/mobile-daily-board` → merge. Then branch `feat/mobile-agenda` off master and write `docs/superpowers/plans/…-mobile-6e-…md`. 6e builds the **Agenda** (week view, screen 9), the **Nova tarefa** 2-step recurring create (screen 12), and **Criar ambiente** (screen 13). Reuse 6d's `boardApi`/`environmentsApi`, the `ActiveEnvironmentProvider`, and the shared components. Note the FAB "Nova tarefa" (6d) currently routes to a placeholder — 6e wires it. Consider adding a mobile recurring-task/agenda API module and a create-environment endpoint call (backend `POST /environments/` already exists).
+Finish 6e: dispatch the final whole-branch review, then open the PR for `feat/mobile-agenda` → merge. Then branch `feat/mobile-environments` off master and write `docs/superpowers/plans/…-mobile-6f-…md`. **6f is the last slice**: "Meus ambientes" (screen 11), "Casa · membros" (screen 16, reuse the 6d members endpoint), profile, and the bell/notifications feed (screen 15, backend bell API from Plan 4) + Expo push-token registration (`POST /api/push-tokens/`, Plan 5). Good moment to also fold in the accumulated cross-slice follow-ups (a shared `MembersProvider`, environment switcher for `setActive`, the invite deep-link fix).
 
-**6d recap (done):** backend members-list endpoint; mobile `environments`/`members`/`board` API; `ActiveEnvironmentProvider` + `BoardProvider` (race-guarded, `deriveBoard`); daily-board screen (hero SVG ring, Atrasadas/Hoje, TaskCard, optimistic complete + 5s undo, empty/error states); task-detail **modal** (REPETE + placeholders, adiar/reatribuir/assumir/concluir via MemberPickerSheet); live-WS client (`useBoardSocket`: surgical status patch, debounced refetch for new ids, `connected` → hero live dot). 223 jest tests + tsc clean; backend members tests + ruff clean. Web-verified day+night against a real seeded backend (board, detail, real auth + a real completed action). Live WS **client** verified connecting; live **push** blocked by a backend `channels_redis` Redis read-timeout (tracked follow-up, not a 6d client bug).
+**6e recap (done):** mobile `boardApi.getWeek`/`weekStartISO`, `environmentsApi.create`, `tasksApi` (createDefinition/createRecurring); **Agenda** tab (WeekStrip + AgendaList, status bars, "SEM HORÁRIO", dashed POSTPONED, read-only); **Nova tarefa** admin-only 2-step modal (title/assignee/day-chips→weekday mapping/time → 1 TaskDefinition + N RecurringTask, partial-failure handling; wires the 6d FAB); **Criar ambiente** modal (name/type/local-color → create → `addAndActivate`; wires the no-env empty state). 326 jest tests + tsc clean. Web-verified day+night against a real backend (Agenda live on-brand; Nova tarefa admin flow verified end-to-end incl. real DB weekday rows).
+
+**6d recap (merged):** members endpoint; `environments`/`members`/`board` API; `ActiveEnvironmentProvider` + `BoardProvider` (`deriveBoard`); daily-board screen (SVG ring, optimistic complete + 5s undo); task-detail modal; live-WS client (`useBoardSocket`). Live **push** blocked by a backend `channels_redis` Redis read-timeout (tracked, not a client bug).
 
 ## Tracked follow-ups (not blocking; pick up when relevant)
 
@@ -54,6 +56,13 @@ Finish 6d: dispatch the final whole-branch review, then open the PR for `feat/mo
 - **LATE checkbox not danger-toned**: handoff wants the late card's checkbox ring in `danger`, but `TaskCheckbox` has no danger state (card conveys via `dangerBg` + danger metadata). Add a danger variant to `TaskCheckbox` for full fidelity.
 - Minor: task-detail `Modal` `visible` never toggles false (closes by unmount → no slide-out animation); `useMembers` fetched independently by board + detail (no shared cache).
 - Minor (final-review): board shows the empty state ("Nada para hoje 🎉") for one frame before the spinner because `BoardProvider` inits `loading=false` → init `loading=true` or add a first-load flag; add day `overlaySoft`/`scrim` tokens so `TaskDetail`/`MemberPickerSheet` stop using literal rgba; `useUndoableComplete`'s unmount-flush can `setState` after unmount on sign-out (dev warning only); `TaskDetail` action error-revert restores a whole click-time snapshot (edge race, self-heals on refetch).
+
+**Mobile (6e follow-ups):**
+- **Shared `MembersProvider`**: `useMembers` is now fetched independently by 3 screens (board, task-detail, new-task) — build one shared members context/cache (do it in 6f).
+- **New-task partial-failure retry** re-runs `createDefinition` (possible duplicate `TaskDefinition`) and re-submits already-succeeded weekdays → track `definitionId` + only retry failed weekdays; also call `board.refetch()` after a partial success. Consider a backend convenience endpoint that creates a definition + N recurring tasks atomically.
+- **Member one-off task** creation isn't built (Nova tarefa is admin-only recurring); `POST /occurrences/` already supports member one-offs.
+- **Agenda can't open task detail** (TaskDetail is coupled to `BoardProvider`/today) — decouple to reuse in the week view; Agenda also has no week navigation yet (static month pill).
+- **Environment color** picked in Criar ambiente is local-only (no backend field).
 
 **Mobile (earlier):**
 - Invite deep-link is unreachable for **already-signed-in** users (invite/join routes live under `(auth)`; the guard mounts only one group) → move to a shared route or make reachable in both.

@@ -1,5 +1,5 @@
 import { apiClient } from "../client";
-import { boardApi, todayISO } from "../board";
+import { boardApi, todayISO, weekStartISO } from "../board";
 
 jest.mock("../client", () => ({
   apiClient: {
@@ -224,6 +224,28 @@ describe("boardApi", () => {
       );
     });
   });
+
+  describe("getWeek", () => {
+    test("gets the occurrences endpoint with envId + week_of query, maps snake_case fields, and preserves order", async () => {
+      mockRequest.mockResolvedValueOnce([occurrenceResponse3Done, occurrenceResponse1, occurrenceResponse2]);
+
+      const result = await boardApi.getWeek("env-123", "2026-07-27");
+
+      expect(mockRequest).toHaveBeenCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledWith("/api/environments/env-123/occurrences/?week_of=2026-07-27", {
+        method: "GET",
+      });
+
+      expect(result).toEqual([occurrenceMapped3Done, occurrenceMapped1, occurrenceMapped2]);
+    });
+
+    test("propagates the error when apiClient.request rejects", async () => {
+      const error = new Error("network down");
+      mockRequest.mockRejectedValueOnce(error);
+
+      await expect(boardApi.getWeek("env-123", "2026-07-27")).rejects.toThrow("network down");
+    });
+  });
 });
 
 describe("todayISO", () => {
@@ -256,5 +278,70 @@ describe("todayISO", () => {
     jest.useFakeTimers().setSystemTime(new Date(2026, 0, 5, 12, 0, 0)); // Jan 5
 
     expect(todayISO()).toBe("2026-01-05");
+  });
+});
+
+describe("weekStartISO", () => {
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  test("returns a zero-padded YYYY-MM-DD string", () => {
+    expect(weekStartISO(new Date(2026, 6, 28))).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
+
+  test("returns the same date when given a Monday", () => {
+    expect(weekStartISO(new Date(2026, 6, 27))).toBe("2026-07-27"); // Mon Jul 27 2026
+  });
+
+  test("returns the Monday of the same week for a mid-week date", () => {
+    expect(weekStartISO(new Date(2026, 6, 28))).toBe("2026-07-27"); // Tue -> Mon
+    expect(weekStartISO(new Date(2026, 6, 31))).toBe("2026-07-27"); // Fri -> Mon
+  });
+
+  test("rolls a Sunday back to the previous Monday, including a month rollover", () => {
+    expect(weekStartISO(new Date(2026, 7, 2))).toBe("2026-07-27"); // Sun Aug 2 -> Mon Jul 27
+  });
+
+  test("rolls a Sunday back to the previous Monday across a year boundary", () => {
+    expect(weekStartISO(new Date(2026, 0, 4))).toBe("2025-12-29"); // Sun Jan 4 2026 -> Mon Dec 29 2025
+  });
+
+  test("handles a month rollover when the Sunday itself is the 1st of the month (Sunday Mar 1 2026 -> Mon Feb 23 2026)", () => {
+    expect(weekStartISO(new Date(2026, 2, 1))).toBe("2026-02-23");
+  });
+
+  test("defaults to the current date when called with no argument", () => {
+    jest.useFakeTimers().setSystemTime(new Date(2026, 6, 28, 12, 0, 0)); // Tue Jul 28 2026
+
+    expect(weekStartISO()).toBe("2026-07-27");
+  });
+
+  test("uses the local date, not the UTC date, for a late-night local timestamp", () => {
+    // 23:30 local time on a Tuesday. If this used any UTC-based conversion, the
+    // computed weekday (and therefore the Monday) could shift to the wrong day.
+    jest.useFakeTimers().setSystemTime(new Date(2026, 6, 28, 23, 30, 0));
+
+    expect(weekStartISO()).toBe("2026-07-27");
+  });
+
+  // The Tuesday-night probe above reuses the SAME Mon-Sun week whether or not the
+  // instant gets UTC-shifted forward by a few hours (Tue 23:30 -> Wed still sits in
+  // the Jul 27-Aug 2 week), so it would pass even against a buggy toISOString()/
+  // getUTCDay()-based implementation. These two probes straddle an actual
+  // Sunday->Monday WEEK boundary, so a UTC shift across midnight would land in a
+  // different week and produce a different (wrong) Monday, genuinely failing.
+  test("rolls back to the previous week for a Sunday-night boundary probe (discriminates against a UTC-shifted implementation)", () => {
+    // Sun Aug 2 2026, 23:30 local -> correct Monday is Jul 27 (the week containing
+    // Aug 2). A UTC-based implementation could shift this instant to Mon Aug 3,
+    // which belongs to the NEXT week, wrongly returning 2026-08-03.
+    expect(weekStartISO(new Date(2026, 7, 2, 23, 30, 0))).toBe("2026-07-27");
+  });
+
+  test("stays in the new week for a just-after-midnight Monday boundary probe (discriminates against a UTC-shifted implementation)", () => {
+    // Mon Aug 3 2026, 00:30 local -> correct Monday is itself, Aug 3. A UTC-based
+    // implementation could shift this instant backward past midnight to Sun Aug 2
+    // (the PREVIOUS week), wrongly returning 2026-07-27.
+    expect(weekStartISO(new Date(2026, 7, 3, 0, 30, 0))).toBe("2026-08-03");
   });
 });

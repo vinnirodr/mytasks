@@ -132,6 +132,7 @@ beforeEach(() => {
     environments: [env],
     active: env,
     setActive: jest.fn(),
+    addAndActivate: jest.fn(),
     loading: false,
     error: null,
     reload: jest.fn(),
@@ -228,6 +229,7 @@ test("shows a CTA to join an environment when there is no active environment", (
     environments: [],
     active: null,
     setActive: jest.fn(),
+    addAndActivate: jest.fn(),
     loading: false,
     error: null,
     reload: jest.fn(),
@@ -238,6 +240,41 @@ test("shows a CTA to join an environment when there is no active environment", (
   expect(screen.getByTestId("no-environment-cta")).toBeTruthy();
   fireEvent.press(screen.getByText("Entrar com código"));
   expect(mockPush).toHaveBeenCalledWith("/(auth)/join");
+});
+
+describe("create-environment CTA (Plan 6e, Task 4)", () => {
+  beforeEach(() => {
+    mockUseActiveEnvironment.mockReturnValue({
+      environments: [],
+      active: null,
+      setActive: jest.fn(),
+      addAndActivate: jest.fn(),
+      loading: false,
+      error: null,
+      reload: jest.fn(),
+    });
+  });
+
+  test("tapping 'Criar ambiente' in the no-environment empty state opens CreateEnvModal", () => {
+    renderScreen();
+
+    expect(screen.queryByTestId("create-env-modal")).toBeNull();
+
+    fireEvent.press(screen.getByText("Criar ambiente"));
+
+    expect(screen.getByTestId("create-env-modal")).toBeTruthy();
+  });
+
+  test("closing CreateEnvModal clears the open state", () => {
+    renderScreen();
+
+    fireEvent.press(screen.getByText("Criar ambiente"));
+    expect(screen.getByTestId("create-env-modal")).toBeTruthy();
+
+    fireEvent.press(screen.getByTestId("create-env-close"));
+
+    expect(screen.queryByTestId("create-env-modal")).toBeNull();
+  });
 });
 
 test("shows a friendly empty state (keeping the 0/0 hero) when there are no occurrences today", () => {
@@ -401,12 +438,38 @@ describe("completing a task", () => {
 // Placeholder actions
 // ---------------------------------------------------------------------------
 
-test("bell/avatar/FAB placeholders don't crash when pressed", () => {
+test("bell/avatar placeholders don't crash when pressed", () => {
   renderScreen();
 
   fireEvent.press(screen.getByTestId("notifications-button"));
   fireEvent.press(screen.getByTestId("profile-avatar-button"));
-  fireEvent.press(screen.getByTestId("fab-new-task"));
+});
+
+// ---------------------------------------------------------------------------
+// Hosting the NewTaskModal (Plan 6e, Task 3) — the FAB no longer no-ops
+// ---------------------------------------------------------------------------
+
+describe("new task modal hosting", () => {
+  test("tapping the FAB opens NewTaskModal", () => {
+    renderScreen();
+
+    expect(screen.queryByTestId("new-task-modal")).toBeNull();
+
+    fireEvent.press(screen.getByTestId("fab-new-task"));
+
+    expect(screen.getByTestId("new-task-modal")).toBeTruthy();
+  });
+
+  test("closing NewTaskModal clears the open state", () => {
+    renderScreen();
+
+    fireEvent.press(screen.getByTestId("fab-new-task"));
+    expect(screen.getByTestId("new-task-modal")).toBeTruthy();
+
+    fireEvent.press(screen.getByTestId("new-task-close"));
+
+    expect(screen.queryByTestId("new-task-modal")).toBeNull();
+  });
 });
 
 // ---------------------------------------------------------------------------

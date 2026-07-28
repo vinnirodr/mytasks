@@ -246,6 +246,64 @@ describe("ActiveEnvironmentProvider", () => {
     expect(latest?.loading).toBe(false);
   });
 
+  test("addAndActivate inserts a new environment, activates it, and persists it", async () => {
+    mockList.mockResolvedValue([envA]);
+    mockGetActiveEnvironmentId.mockResolvedValue("env-a");
+
+    render(
+      <ActiveEnvironmentProvider>
+        <Probe />
+      </ActiveEnvironmentProvider>,
+    );
+
+    await waitFor(() => {
+      expect(latest?.active).toEqual(envA);
+    });
+
+    mockSetActiveEnvironmentId.mockClear();
+
+    const envC: Environment = {
+      id: "env-c",
+      name: "Novo lugar",
+      envType: "HOUSE",
+      timezone: "America/Sao_Paulo",
+      role: "ADMIN",
+    };
+
+    act(() => {
+      latest?.addAndActivate(envC);
+    });
+
+    expect(latest?.environments).toEqual([envA, envC]);
+    expect(latest?.active).toEqual(envC);
+    expect(mockSetActiveEnvironmentId).toHaveBeenCalledWith("env-c");
+  });
+
+  test("addAndActivate only activates (no duplicate insert) when the environment is already in the list", async () => {
+    mockList.mockResolvedValue([envA, envB]);
+    mockGetActiveEnvironmentId.mockResolvedValue("env-a");
+
+    render(
+      <ActiveEnvironmentProvider>
+        <Probe />
+      </ActiveEnvironmentProvider>,
+    );
+
+    await waitFor(() => {
+      expect(latest?.active).toEqual(envA);
+    });
+
+    mockSetActiveEnvironmentId.mockClear();
+
+    act(() => {
+      latest?.addAndActivate(envB);
+    });
+
+    expect(latest?.environments).toEqual([envA, envB]);
+    expect(latest?.active).toEqual(envB);
+    expect(mockSetActiveEnvironmentId).toHaveBeenCalledWith("env-b");
+  });
+
   test("useActiveEnvironment throws when used outside the provider", () => {
     const consoleError = jest.spyOn(console, "error").mockImplementation(() => {});
     expect(() => render(<Probe />)).toThrow(/ActiveEnvironmentProvider/);

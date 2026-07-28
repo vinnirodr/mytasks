@@ -11,8 +11,12 @@
  * this screen — ring/fade approximations, the status→checkbox mapping, and
  * how the undo window is implemented).
  *
- * The bell/avatar/FAB lead to 6e/6f screens that don't exist yet — they're
+ * The bell/avatar still lead to 6f screens that don't exist yet — they're
  * wired to a no-op `comingSoon()` placeholder here rather than a new route.
+ * The "Nova tarefa" FAB (Task 6e-T3) is wired for real: it opens
+ * `NewTaskModal` via local `newTaskOpen` state, the same hosted-overlay
+ * pattern `TaskDetail` uses below (not a route, for the same tab-navigator
+ * reason).
  *
  * Tapping a `TaskCard` (Task 6) opens `TaskDetail` as a `Modal`/overlay
  * hosted right here, controlled by `selectedOccurrenceId` — NOT a
@@ -41,7 +45,9 @@ import { boardApi, type Occurrence } from '@/api/board';
 import { useAuth } from '@/auth/useAuth';
 import { Avatar, AvatarStack } from '@/components/Avatar';
 import { Button } from '@/components/Button';
+import { CreateEnvModal } from '@/components/CreateEnvModal';
 import { ProgressRing } from '@/components/ProgressRing';
+import { NewTaskModal } from '@/components/NewTaskModal';
 import { SectionHeader } from '@/components/SectionHeader';
 import { Splash } from '@/components/Splash';
 import { TaskCard } from '@/components/TaskCard';
@@ -95,11 +101,11 @@ function presenceLabel(count: number): string {
 }
 
 /**
- * Placeholder for the bell/avatar/FAB actions — their real screens are 6e
- * (nova tarefa, notificações) and 6f (perfil). A literal no-op keeps this
- * task from inventing throwaway routes or a toast component that the next
- * slice would just delete; `testID`s on the pressables let tests assert the
- * controls exist and don't crash when pressed.
+ * Placeholder for the bell/avatar actions — their real screens are 6f
+ * (notificações, perfil). (The FAB is now wired to the Nova tarefa modal.)
+ * A literal no-op keeps this task from inventing throwaway routes or a toast
+ * component that the next slice would just delete; `testID`s on the
+ * pressables let tests assert the controls exist and don't crash when pressed.
  */
 function comingSoon() {}
 
@@ -119,6 +125,14 @@ export default function HomeScreen() {
   // this screen's `BoardProvider` state, so it's hosted here rather than
   // pushed as a route (see the file header for why).
   const [selectedOccurrenceId, setSelectedOccurrenceId] = useState<string | null>(null);
+
+  // The "Nova tarefa" FAB (Task 6e-T3) opens `NewTaskModal` the same way —
+  // local state instead of a route, for the same tab-navigator reason.
+  const [newTaskOpen, setNewTaskOpen] = useState(false);
+
+  // "Criar ambiente" (Task 6e-T4), offered alongside "Entrar com código" in
+  // the no-environment empty state below — same local-state overlay pattern.
+  const [createEnvOpen, setCreateEnvOpen] = useState(false);
 
   // The optimistic change already reverted inside useUndoableComplete (or
   // TaskDetail's own "Concluir" action) by the time this fires — this only
@@ -167,9 +181,16 @@ export default function HomeScreen() {
             <Body color="inkMuted" style={styles.emptyStateBody}>
               Entre com um código de convite para começar a organizar as tarefas da casa.
             </Body>
-            <Button title="Entrar com código" onPress={() => router.push('/(auth)/join')} />
+            <Button title="Criar ambiente" onPress={() => setCreateEnvOpen(true)} />
+            <Button
+              title="Entrar com código"
+              variant="outline"
+              onPress={() => router.push('/(auth)/join')}
+            />
           </View>
         </SafeAreaView>
+
+        <CreateEnvModal visible={createEnvOpen} onClose={() => setCreateEnvOpen(false)} />
       </View>
     );
   }
@@ -383,7 +404,7 @@ export default function HomeScreen() {
           testID="fab-new-task"
           accessibilityRole="button"
           accessibilityLabel="Nova tarefa"
-          onPress={comingSoon}
+          onPress={() => setNewTaskOpen(true)}
           style={[
             styles.fab,
             { backgroundColor: isDark ? darkColors.accent : lightColors.tangerine },
@@ -406,6 +427,8 @@ export default function HomeScreen() {
         onClose={() => setSelectedOccurrenceId(null)}
         onCompleteError={handleUndoError}
       />
+
+      <NewTaskModal visible={newTaskOpen} onClose={() => setNewTaskOpen(false)} />
     </View>
   );
 }
