@@ -101,11 +101,11 @@ function presenceLabel(count: number): string {
 }
 
 /**
- * Placeholder for the bell/avatar/FAB actions — their real screens are 6e
- * (nova tarefa, notificações) and 6f (perfil). A literal no-op keeps this
- * task from inventing throwaway routes or a toast component that the next
- * slice would just delete; `testID`s on the pressables let tests assert the
- * controls exist and don't crash when pressed.
+ * Placeholder for the bell/avatar actions — their real screens are 6f
+ * (notificações, perfil). (The FAB is now wired to the Nova tarefa modal.)
+ * A literal no-op keeps this task from inventing throwaway routes or a toast
+ * component that the next slice would just delete; `testID`s on the
+ * pressables let tests assert the controls exist and don't crash when pressed.
  */
 function comingSoon() {}
 
