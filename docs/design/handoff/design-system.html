@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Roboto:wght@400;500;700&family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet" />
+<style>
+  body { margin: 0; background: #F2EDE4; }
+  a { color: #123B2E; text-decoration: none; }
+  a:hover { color: #FF5A2B; text-decoration: underline; }
+  .ms { font-family: 'Material Symbols Rounded'; font-weight: normal; font-style: normal; line-height: 1; letter-spacing: normal; text-transform: none; display: inline-block; white-space: nowrap; direction: ltr; -webkit-font-feature-settings: 'liga'; -webkit-font-smoothing: antialiased; }
+</style>
+</helmet>
+
+<section style="padding: 56px 56px 40px; font-family: Manrope, system-ui, sans-serif; color: #1A1714; display: flex; flex-direction: column; gap: 18px;">
+  <div style="display: flex; align-items: center; gap: 6px;">
+    <svg width="42" height="42" viewBox="0 0 44 44" fill="none"><path d="M22 6a16 16 0 0 0 0 32" stroke="#123B2E" stroke-width="7" stroke-linecap="round" /><path d="M22 6a16 16 0 0 1 0 32" stroke="#FF5A2B" stroke-width="7" stroke-linecap="round" /></svg>
+    <span style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 40px; font-weight: 800; letter-spacing: -0.045em;">rganizados</span>
+  </div>
+  <h1 style="margin: 0; font-family: 'Bricolage Grotesque', sans-serif; font-size: 52px; font-weight: 800; letter-spacing: -0.04em; line-height: 1;">Design System — Casa Viva</h1>
+  <p style="margin: 0; max-width: 780px; font-size: 16px; line-height: 1.6; color: #6E655B; text-wrap: pretty;">Fonte de verdade do produto: tokens, componentes e estados nos temas dia e noite, com a adaptação para Material 3. Tudo aqui está aplicado nas telas de <a href="./Protótipo.dc.html">Protótipo</a>; a marca vive em <a href="./Marca.dc.html">Marca</a>. Medidas em px de tela lógica.</p>
+  <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px;">
+    <div style="height: 30px; padding: 0 14px; border-radius: 999px; background: #123B2E; color: #F2EDE4; font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; display: flex; align-items: center;">v2 · CASA VIVA</div>
+    <div style="height: 30px; padding: 0 14px; border-radius: 999px; border: 1px solid #D3C9BB; font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: #6E655B; display: flex; align-items: center;">iOS 402×874 · ANDROID 412×892</div>
+  </div>
+</section>
+
+<section style="padding: 8px 56px 48px; font-family: Manrope, system-ui, sans-serif; color: #1A1714; display: flex; flex-direction: column; gap: 20px;">
+  <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: #9A9086;">01 · COR — TEMA DIA</div>
+  <div style="display: flex; gap: 14px; flex-wrap: wrap;">
+
+    <div style="width: 210px; background: #FFFDF9; border-radius: 22px; overflow: hidden; box-shadow: 0 2px 10px rgba(26,23,20,0.07);">
+      <div style="height: 84px; background: #F2EDE4;"></div>
+      <div style="padding: 14px 16px; display: flex; flex-direction: column; gap: 3px;"><div style="font-size: 15px; font-weight: 700;">Areia — bg</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8A8076;">#F2EDE4</div><div style="font-size: 12.5px; color: #8A8076; line-height: 1.4;">Fundo de todas as telas</div></div>
+    </div>
+
+    <div style="width: 210px; background: #FFFDF9; border-radius: 22px; overflow: hidden; box-shadow: 0 2px 10px rgba(26,23,20,0.07);">
+      <div style="height: 84px; background: #FFFDF9; border-bottom: 1px solid #EFE8DC;"></div>
+      <div style="padding: 14px 16px; display: flex; flex-direction: column; gap: 3px;"><div style="font-size: 15px; font-weight: 700;">Creme — surface</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8A8076;">#FFFDF9</div><div style="font-size: 12.5px; color: #8A8076; line-height: 1.4;">Cartões, campos, nav</div></div>
+    </div>
+
+    <div style="width: 210px; background: #FFFDF9; border-radius: 22px; overflow: hidden; box-shadow: 0 2px 10px rgba(26,23,20,0.07);">
+      <div style="height: 84px; background: #123B2E;"></div>
+      <div style="padding: 14px 16px; display: flex; flex-direction: column; gap: 3px;"><div style="font-size: 15px; font-weight: 700;">Verde-mata</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8A8076;">#123B2E</div><div style="font-size: 12.5px; color: #8A8076; line-height: 1.4;">Ação primária, hero, nav ativa</div></div>
+    </div>
+
+    <div style="width: 210px; background: #FFFDF9; border-radius: 22px; overflow: hidden; box-shadow: 0 2px 10px rgba(26,23,20,0.07);">
+      <div style="height: 84px; background: #FF5A2B;"></div>
+      <div style="padding: 14px 16px; display: flex; flex-direction: column; gap: 3px;"><div style="font-size: 15px; font-weight: 700;">Tangerina</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8A8076;">#FF5A2B</div><div style="font-size: 12.5px; color: #8A8076; line-height: 1.4;">FAB, avanço, gesto</div></div>
+    </div>
+
+    <div style="width: 210px; background: #FFFDF9; border-radius: 22px; overflow: hidden; box-shadow: 0 2px 10px rgba(26,23,20,0.07);">
+      <div style="height: 84px; background: #FFD65A;"></div>
+      <div style="padding: 14px 16px; display: flex; flex-direction: column; gap: 3px;"><div style="font-size: 15px; font-weight: 700;">Manteiga</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8A8076;">#FFD65A</div><div style="font-size: 12.5px; color: #8A8076; line-height: 1.4;">Progresso, selo ADM, check sobre verde</div></div>
+    </div>
+
+    <div style="width: 210px; background: #FFFDF9; border-radius: 22px; overflow: hidden; box-shadow: 0 2px 10px rgba(26,23,20,0.07);">
+      <div style="height: 84px; background: #C7381F;"></div>
+      <div style="padding: 14px 16px; display: flex; flex-direction: column; gap: 3px;"><div style="font-size: 15px; font-weight: 700;">Atraso</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8A8076;">#C7381F · bg #FFE9E0</div><div style="font-size: 12.5px; color: #8A8076; line-height: 1.4;">Único vermelho do sistema</div></div>
+    </div>
+
+  </div>
+
+  <div style="background: #FFFDF9; border-radius: 22px; padding: 22px 24px; box-shadow: 0 2px 10px rgba(26,23,20,0.07); display: flex; flex-wrap: wrap; gap: 22px;">
+    <div style="display: flex; flex-direction: column; gap: 10px; min-width: 260px;">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; color: #A0968A;">TEXTO</div>
+      <div style="display: flex; align-items: center; gap: 12px;"><div style="width: 26px; height: 26px; border-radius: 8px; background: #1A1714;"></div><div style="font-size: 14px;">Primário <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8A8076;">#1A1714</span></div></div>
+      <div style="display: flex; align-items: center; gap: 12px;"><div style="width: 26px; height: 26px; border-radius: 8px; background: #6E655B;"></div><div style="font-size: 14px;">Secundário <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8A8076;">#6E655B</span></div></div>
+      <div style="display: flex; align-items: center; gap: 12px;"><div style="width: 26px; height: 26px; border-radius: 8px; background: #8A8076;"></div><div style="font-size: 14px;">Terciário <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8A8076;">#8A8076</span></div></div>
+      <div style="display: flex; align-items: center; gap: 12px;"><div style="width: 26px; height: 26px; border-radius: 8px; background: #A0968A;"></div><div style="font-size: 14px;">Rótulo mono <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8A8076;">#A0968A</span></div></div>
+      <div style="display: flex; align-items: center; gap: 12px;"><div style="width: 26px; height: 26px; border-radius: 8px; background: #B3A99C;"></div><div style="font-size: 14px;">Placeholder <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8A8076;">#B3A99C</span></div></div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 10px; min-width: 260px;">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; color: #A0968A;">SUPORTE</div>
+      <div style="display: flex; align-items: center; gap: 12px;"><div style="width: 26px; height: 26px; border-radius: 8px; background: #FFF1D6;"></div><div style="font-size: 14px;">Aviso/dica <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8A8076;">#FFF1D6 · texto #6A5518</span></div></div>
+      <div style="display: flex; align-items: center; gap: 12px;"><div style="width: 26px; height: 26px; border-radius: 8px; background: #7BD8A6;"></div><div style="font-size: 14px;">Presença ao vivo <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8A8076;">#7BD8A6</span></div></div>
+      <div style="display: flex; align-items: center; gap: 12px;"><div style="width: 26px; height: 26px; border-radius: 8px; background: #E2DACD;"></div><div style="font-size: 14px;">Fio 1px <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8A8076;">#E2DACD</span></div></div>
+      <div style="display: flex; align-items: center; gap: 12px;"><div style="width: 26px; height: 26px; border-radius: 8px; background: #EFE8DC;"></div><div style="font-size: 14px;">Divisor / chip neutro <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8A8076;">#EFE8DC</span></div></div>
+      <div style="display: flex; align-items: center; gap: 12px;"><div style="width: 26px; height: 26px; border-radius: 8px; background: #C9BFB2;"></div><div style="font-size: 14px;">Contorno de checkbox <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8A8076;">#C9BFB2</span></div></div>
+    </div>
+    <div style="flex: 1; min-width: 260px; display: flex; flex-direction: column; gap: 10px;">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; color: #A0968A;">REGRAS</div>
+      <div style="font-size: 13.5px; line-height: 1.55; color: #6E655B;">Tangerina e verde nunca competem: o verde carrega a ação estrutural (entrar, concluir, abrir) e a tangerina o gesto de criar ou avançar. Sobre o verde, a tangerina é substituída pela manteiga. Vermelho é exclusivo de atraso. Máximo de dois fundos por tela: areia e creme.</div>
+    </div>
+  </div>
+</section>
+
+<section style="background: #0B0F0D; padding: 44px 56px 48px; font-family: Manrope, system-ui, sans-serif; color: #F3EFE6; display: flex; flex-direction: column; gap: 20px;">
+  <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: #7A857D;">02 · COR — TEMA NOITE</div>
+  <div style="display: flex; gap: 14px; flex-wrap: wrap;">
+    <div style="width: 210px; background: #18211D; border: 1px solid rgba(243,239,230,0.08); border-radius: 22px; overflow: hidden;">
+      <div style="height: 84px; background: #0E1311;"></div>
+      <div style="padding: 14px 16px; display: flex; flex-direction: column; gap: 3px;"><div style="font-size: 15px; font-weight: 700;">Pinho — bg</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8F9A91;">#0E1311</div><div style="font-size: 12.5px; color: #8F9A91; line-height: 1.4;">Preto quente, nunca neutro</div></div>
+    </div>
+    <div style="width: 210px; background: #18211D; border: 1px solid rgba(243,239,230,0.08); border-radius: 22px; overflow: hidden;">
+      <div style="height: 84px; background: #18211D; border-bottom: 1px solid rgba(243,239,230,0.10);"></div>
+      <div style="padding: 14px 16px; display: flex; flex-direction: column; gap: 3px;"><div style="font-size: 15px; font-weight: 700;">Surface</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8F9A91;">#18211D</div><div style="font-size: 12.5px; color: #8F9A91; line-height: 1.4;">Elevação por luz + fio 1px</div></div>
+    </div>
+    <div style="width: 210px; background: #18211D; border: 1px solid rgba(243,239,230,0.08); border-radius: 22px; overflow: hidden;">
+      <div style="height: 84px; background: #F2C744;"></div>
+      <div style="padding: 14px 16px; display: flex; flex-direction: column; gap: 3px;"><div style="font-size: 15px; font-weight: 700;">Manteiga — accent</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8F9A91;">#F2C744 · texto #2A2306</div><div style="font-size: 12.5px; color: #8F9A91; line-height: 1.4;">Única cor de destaque</div></div>
+    </div>
+    <div style="width: 210px; background: #18211D; border: 1px solid rgba(243,239,230,0.08); border-radius: 22px; overflow: hidden;">
+      <div style="height: 84px; background: #F3EFE6;"></div>
+      <div style="padding: 14px 16px; display: flex; flex-direction: column; gap: 3px;"><div style="font-size: 15px; font-weight: 700;">Creme — texto/nav</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8F9A91;">#F3EFE6</div><div style="font-size: 12.5px; color: #8F9A91; line-height: 1.4;">Texto e pílula de aba ativa</div></div>
+    </div>
+    <div style="width: 210px; background: #18211D; border: 1px solid rgba(243,239,230,0.08); border-radius: 22px; overflow: hidden;">
+      <div style="height: 84px; background: #FF7A4D;"></div>
+      <div style="padding: 14px 16px; display: flex; flex-direction: column; gap: 3px;"><div style="font-size: 15px; font-weight: 700;">Atraso</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8F9A91;">#FF7A4D · bg #241813</div><div style="font-size: 12.5px; color: #8F9A91; line-height: 1.4;">Borda rgba(255,122,77,.28)</div></div>
+    </div>
+    <div style="width: 210px; background: #18211D; border: 1px solid rgba(243,239,230,0.08); border-radius: 22px; overflow: hidden;">
+      <div style="height: 84px; background: #6FCB9B;"></div>
+      <div style="padding: 14px 16px; display: flex; flex-direction: column; gap: 3px;"><div style="font-size: 15px; font-weight: 700;">Presença</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #8F9A91;">#6FCB9B</div><div style="font-size: 12.5px; color: #8F9A91; line-height: 1.4;">Halo a 14% de opacidade</div></div>
+    </div>
+  </div>
+  <div style="background: #18211D; border: 1px solid rgba(243,239,230,0.08); border-radius: 22px; padding: 22px 24px; display: flex; flex-wrap: wrap; gap: 22px;">
+    <div style="display: flex; flex-direction: column; gap: 9px; min-width: 280px;">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; color: #6F7A73;">TEXTO E FIOS</div>
+      <div style="font-size: 13.5px; color: #8F9A91;">Primário <span style="font-family: 'IBM Plex Mono', monospace; color: #F3EFE6;">#F3EFE6</span> · secundário <span style="font-family: 'IBM Plex Mono', monospace;">#8F9A91</span> · terciário <span style="font-family: 'IBM Plex Mono', monospace;">#7A857D</span> · rótulo <span style="font-family: 'IBM Plex Mono', monospace;">#6F7A73</span> · placeholder <span style="font-family: 'IBM Plex Mono', monospace;">#5C665F</span></div>
+      <div style="font-size: 13.5px; color: #8F9A91;">Fio de cartão <span style="font-family: 'IBM Plex Mono', monospace;">rgba(243,239,230,0.07)</span> · fio de nav e campo <span style="font-family: 'IBM Plex Mono', monospace;">0.09</span> · botão-ícone <span style="font-family: 'IBM Plex Mono', monospace;">0.08</span></div>
+    </div>
+    <div style="flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 9px;">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; color: #6F7A73;">REGRAS</div>
+      <div style="font-size: 13.5px; line-height: 1.55; color: #8F9A91;">Nenhuma sombra no escuro — elevação vem de luminosidade e do fio de 1px. O verde-mata deixa de ser ação e vira estrutura (cabeçalhos, molduras). Texto nunca em branco puro. A aba ativa inverte: pílula creme com ícone escuro.</div>
+    </div>
+  </div>
+</section>
+
+<section style="padding: 48px 56px 48px; font-family: Manrope, system-ui, sans-serif; color: #1A1714; display: flex; flex-direction: column; gap: 20px;">
+  <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: #9A9086;">03 · TIPOGRAFIA</div>
+  <div style="background: #FFFDF9; border-radius: 22px; padding: 28px; box-shadow: 0 2px 10px rgba(26,23,20,0.07); display: flex; flex-direction: column; gap: 22px;">
+    <div style="display: flex; align-items: flex-end; gap: 20px; flex-wrap: wrap;">
+      <div style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 56px; font-weight: 800; letter-spacing: -0.05em; line-height: 0.9;">3/7</div>
+      <div style="font-size: 13px; color: #8A8076; line-height: 1.5; padding-bottom: 6px;">Bricolage 800 · 56/0.9 · −5%<br />Número do dia (hero)</div>
+    </div>
+    <div style="height: 1px; background: #EFE8DC;"></div>
+    <div style="display: flex; align-items: flex-end; gap: 20px; flex-wrap: wrap;">
+      <div style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 34px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.05;">Lavar a louça</div>
+      <div style="font-size: 13px; color: #8A8076; line-height: 1.5; padding-bottom: 4px;">Bricolage 800 · 34/1.05 · −3.5%<br />Título de tela e de detalhe</div>
+    </div>
+    <div style="height: 1px; background: #EFE8DC;"></div>
+    <div style="display: flex; align-items: flex-end; gap: 20px; flex-wrap: wrap;">
+      <div style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 19px; font-weight: 700; letter-spacing: -0.02em;">Atrasadas</div>
+      <div style="font-size: 13px; color: #8A8076; line-height: 1.5;">Bricolage 700 · 19 · −2%<br />Cabeçalho de seção</div>
+    </div>
+    <div style="height: 1px; background: #EFE8DC;"></div>
+    <div style="display: flex; align-items: flex-end; gap: 20px; flex-wrap: wrap;">
+      <div style="font-size: 17px; font-weight: 700; letter-spacing: -0.01em;">Tirar o lixo reciclável</div>
+      <div style="font-size: 13px; color: #8A8076; line-height: 1.5;">Manrope 700 · 17 · −1%<br />Título de tarefa</div>
+    </div>
+    <div style="height: 1px; background: #EFE8DC;"></div>
+    <div style="display: flex; align-items: flex-end; gap: 20px; flex-wrap: wrap;">
+      <div style="font-size: 15px; color: #6E655B; line-height: 1.5;">Corpo de texto e descrições de apoio.</div>
+      <div style="font-size: 13px; color: #8A8076; line-height: 1.5;">Manrope 400/600 · 15–15.5/1.5<br />Corpo</div>
+    </div>
+    <div style="height: 1px; background: #EFE8DC;"></div>
+    <div style="display: flex; align-items: flex-end; gap: 20px; flex-wrap: wrap;">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; letter-spacing: 0.04em;">ONTEM 20:00 · PEDRO</div>
+      <div style="font-size: 13px; color: #8A8076; line-height: 1.5;">Plex Mono 400/500 · 10.5–13 · +4% a +20%<br />Datas, contadores, rótulos — sempre em caixa alta</div>
+    </div>
+    <div style="height: 1px; background: #EFE8DC;"></div>
+    <div style="font-size: 13.5px; color: #6E655B; line-height: 1.55;">No Android, o corpo passa a <strong>Roboto</strong> (400/500) nos mesmos tamanhos; Bricolage e Plex Mono permanecem. Tamanho mínimo em produto: 12px (rótulo de aba); nada de texto abaixo disso.</div>
+  </div>
+</section>
+
+<section style="padding: 8px 56px 48px; font-family: Manrope, system-ui, sans-serif; color: #1A1714; display: flex; flex-direction: column; gap: 20px;">
+  <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: #9A9086;">04 · FORMA, ESPAÇO E ELEVAÇÃO</div>
+  <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+
+    <div style="flex: 1; min-width: 320px; background: #FFFDF9; border-radius: 22px; padding: 24px; box-shadow: 0 2px 10px rgba(26,23,20,0.07); display: flex; flex-direction: column; gap: 16px;">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; color: #A0968A;">RAIO</div>
+      <div style="display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;"><div style="width: 62px; height: 62px; border-radius: 28px; background: #123B2E;"></div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8A8076;">28</div></div>
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;"><div style="width: 62px; height: 62px; border-radius: 22px; background: #EFE8DC;"></div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8A8076;">22</div></div>
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;"><div style="width: 62px; height: 62px; border-radius: 18px; background: #EFE8DC;"></div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8A8076;">18</div></div>
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;"><div style="width: 62px; height: 62px; border-radius: 16px; background: #EFE8DC;"></div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8A8076;">16</div></div>
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;"><div style="width: 62px; height: 62px; border-radius: 999px; background: #FF5A2B;"></div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8A8076;">total</div></div>
+      </div>
+      <div style="font-size: 13px; color: #6E655B; line-height: 1.5;">28 hero e cartão de ambiente · 22 cartão de tarefa · 20 avisos · 18 campo · 16 chip de dia · total em botões, chips, avatares e nav. Bottom sheet e cabeçalho arredondado: 32–34 no topo.</div>
+    </div>
+
+    <div style="flex: 1; min-width: 320px; background: #FFFDF9; border-radius: 22px; padding: 24px; box-shadow: 0 2px 10px rgba(26,23,20,0.07); display: flex; flex-direction: column; gap: 16px;">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; color: #A0968A;">ESPAÇO</div>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 12px;"><div style="width: 4px; height: 16px; background: #123B2E; border-radius: 2px;"></div><div style="font-size: 13.5px;">4 · 6 · 8 · 10 · 12 · 14 · 16 · 18 · 22 · 28 · 34</div></div>
+        <div style="font-size: 13px; color: #6E655B; line-height: 1.5;">Margem lateral: <strong>22px</strong> (iOS) / <strong>16px</strong> (Android). Gap entre cartões: 12. Entre blocos: 18–22. Fundo de lista com nav flutuante: <strong>150px</strong>; com FAB + nav: <strong>168–190px</strong>.</div>
+      </div>
+      <div style="height: 1px; background: #EFE8DC;"></div>
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; color: #A0968A;">ALTURAS FIXAS</div>
+      <div style="font-size: 13.5px; color: #6E655B; line-height: 1.6;">Botão primário 58 (Android 56) · campo 56 · nav 62 (Android 80) · chip de pessoa 44 · chip de dia 46 · botão-ícone 38 · alvo mínimo de toque 44×44</div>
+    </div>
+
+    <div style="flex: 1; min-width: 320px; background: #FFFDF9; border-radius: 22px; padding: 24px; box-shadow: 0 2px 10px rgba(26,23,20,0.07); display: flex; flex-direction: column; gap: 16px;">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; color: #A0968A;">ELEVAÇÃO (SÓ NO DIA)</div>
+      <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <div style="width: 96px; height: 62px; border-radius: 16px; background: #FFFDF9; box-shadow: 0 2px 8px rgba(26,23,20,0.07); display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8A8076;">cartão</div>
+        <div style="width: 96px; height: 62px; border-radius: 16px; background: #FFFDF9; box-shadow: 0 4px 16px rgba(26,23,20,0.10); display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #8A8076;">flutuante</div>
+        <div style="width: 96px; height: 62px; border-radius: 16px; background: #FF5A2B; box-shadow: 0 8px 20px rgba(255,90,43,0.32); display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #fff;">ação</div>
+      </div>
+      <div style="font-size: 13px; color: #6E655B; line-height: 1.5;">A sombra da ação sempre carrega a cor do botão. No tema noite, todas as sombras desaparecem e viram fio de 1px.</div>
+    </div>
+
+  </div>
+</section>
+
+<section style="padding: 8px 56px 48px; font-family: Manrope, system-ui, sans-serif; color: #1A1714; display: flex; flex-direction: column; gap: 20px;">
+  <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: #9A9086;">05 · CONTROLES</div>
+  <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+
+    <div style="width: 420px; background: #FFFDF9; border-radius: 22px; padding: 24px; box-shadow: 0 2px 10px rgba(26,23,20,0.07); display: flex; flex-direction: column; gap: 14px;">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; color: #A0968A;">BOTÕES — DIA</div>
+      <div style="height: 58px; border-radius: 999px; background: #123B2E; color: #F2EDE4; font-size: 16px; font-weight: 800; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(18,59,46,0.26);">Primário estrutural</div>
+      <div style="height: 58px; border-radius: 999px; background: #FF5A2B; color: #fff; font-size: 16px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 8px 20px rgba(255,90,43,0.32);"><span class="ms" style="font-size: 22px;">add</span>Primário de gesto</div>
+      <div style="height: 58px; border-radius: 999px; border: 1.5px solid #D3C9BB; color: #6E655B; font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center;">Secundário</div>
+      <div style="height: 58px; border-radius: 999px; background: #123B2E; color: #F2EDE4; font-size: 16px; font-weight: 800; display: flex; align-items: center; justify-content: center; opacity: 0.4;">Desabilitado (40%)</div>
+      <div style="display: flex; gap: 10px;">
+        <div style="width: 58px; height: 58px; border-radius: 999px; background: #FFFDF9; box-shadow: 0 2px 8px rgba(26,23,20,0.08); display: flex; align-items: center; justify-content: center;"><span class="ms" style="font-size: 24px; color: #6E655B;">schedule</span></div>
+        <div style="width: 58px; height: 58px; border-radius: 999px; background: #FFFDF9; box-shadow: 0 2px 8px rgba(26,23,20,0.08); display: flex; align-items: center; justify-content: center;"><span class="ms" style="font-size: 24px; color: #6E655B;">person_add</span></div>
+        <div style="flex: 1; height: 58px; border-radius: 999px; background: #EFE8DC; color: #1A1714; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px;"><span class="ms" style="font-size: 20px;">content_copy</span>Tonal</div>
+      </div>
+    </div>
+
+    <div style="width: 420px; background: #18211D; border-radius: 22px; padding: 24px; display: flex; flex-direction: column; gap: 14px; color: #F3EFE6;">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; color: #6F7A73;">BOTÕES — NOITE</div>
+      <div style="height: 58px; border-radius: 999px; background: #F2C744; color: #2A2306; font-size: 16px; font-weight: 800; display: flex; align-items: center; justify-content: center;">Primário</div>
+      <div style="height: 58px; border-radius: 999px; background: #F3EFE6; color: #0E1311; font-size: 16px; font-weight: 800; display: flex; align-items: center; justify-content: center;">Primário alternativo</div>
+      <div style="height: 58px; border-radius: 999px; border: 1px solid rgba(243,239,230,0.14); color: #A8B3AB; font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center;">Secundário</div>
+      <div style="height: 58px; border-radius: 999px; background: #F2C744; color: #2A2306; font-size: 16px; font-weight: 800; display: flex; align-items: center; justify-content: center; opacity: 0.4;">Desabilitado (40%)</div>
+      <div style="display: flex; gap: 10px;">
+        <div style="width: 58px; height: 58px; border-radius: 999px; background: #18211D; border: 1px solid rgba(243,239,230,0.09); display: flex; align-items: center; justify-content: center;"><span class="ms" style="font-size: 24px; color: #A8B3AB;">schedule</span></div>
+        <div style="width: 58px; height: 58px; border-radius: 999px; background: #18211D; border: 1px solid rgba(243,239,230,0.09); display: flex; align-items: center; justify-content: center;"><span class="ms" style="font-size: 24px; color: #A8B3AB;">person_add</span></div>
+        <div style="flex: 1; height: 58px; border-radius: 999px; background: rgba(243,239,230,0.08); color: #F3EFE6; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px;"><span class="ms" style="font-size: 20px;">content_copy</span>Tonal</div>
+      </div>
+    </div>
+
+    <div style="width: 420px; background: #FFFDF9; border-radius: 22px; padding: 24px; box-shadow: 0 2px 10px rgba(26,23,20,0.07); display: flex; flex-direction: column; gap: 16px;">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; color: #A0968A;">CAMPOS</div>
+      <div style="display: flex; flex-direction: column; gap: 7px;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: #A0968A;">E-MAIL · PREENCHIDO</div>
+        <div style="height: 56px; border-radius: 18px; background: #FFFDF9; box-shadow: 0 1px 3px rgba(26,23,20,0.08); display: flex; align-items: center; padding: 0 18px; font-size: 16px; font-weight: 600;">marina@email.com</div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 7px;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: #A0968A;">NOME · FOCO</div>
+        <div style="height: 56px; border-radius: 18px; background: #FFFDF9; box-shadow: 0 0 0 2px #123B2E; display: flex; align-items: center; padding: 0 18px; font-size: 16px; font-weight: 600;">Beatriz Nunes</div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 7px;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: #A0968A;">SENHA · VAZIO + FORÇA</div>
+        <div style="height: 56px; border-radius: 18px; background: #FFFDF9; box-shadow: 0 1px 3px rgba(26,23,20,0.08); display: flex; align-items: center; justify-content: space-between; padding: 0 18px; font-size: 16px; color: #B3A99C;">mínimo 8 caracteres<span class="ms" style="font-size: 22px; color: #A0968A;">visibility_off</span></div>
+        <div style="display: flex; gap: 5px; margin-top: 4px;"><div style="flex: 1; height: 5px; border-radius: 999px; background: #123B2E;"></div><div style="flex: 1; height: 5px; border-radius: 999px; background: #123B2E;"></div><div style="flex: 1; height: 5px; border-radius: 999px; background: #E2DACD;"></div></div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 7px;">
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: #C7381F;">E-MAIL · ERRO</div>
+        <div style="height: 56px; border-radius: 18px; background: #FFFDF9; box-shadow: 0 0 0 2px #C7381F; display: flex; align-items: center; padding: 0 18px; font-size: 16px;">marina@email</div>
+        <div style="font-size: 12.5px; color: #C7381F;">Falta o domínio do e-mail.</div>
+      </div>
+    </div>
+
+    <div style="width: 420px; background: #FFFDF9; border-radius: 22px; padding: 24px; box-shadow: 0 2px 10px rgba(26,23,20,0.07); display: flex; flex-direction: column; gap: 18px;">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; color: #A0968A;">SELEÇÃO</div>
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <div style="height: 44px; padding: 0 14px 0 6px; border-radius: 999px; background: #123B2E; color: #F2EDE4; display: flex; align-items: center; gap: 9px; font-size: 14px; font-weight: 700;"><div style="width: 32px; height: 32px; border-radius: 999px; background: #F2EDE4; color: #123B2E; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center;">JO</div>Joana</div>
+        <div style="height: 44px; padding: 0 14px 0 6px; border-radius: 999px; background: #FFFDF9; box-shadow: 0 1px 3px rgba(26,23,20,0.08); color: #6E655B; display: flex; align-items: center; gap: 9px; font-size: 14px; font-weight: 600;"><div style="width: 32px; height: 32px; border-radius: 999px; background: #F0A98C; color: #5A2A16; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center;">PE</div>Pedro</div>
+      </div>
+      <div style="display: flex; gap: 7px;">
+        <div style="flex: 1; height: 46px; border-radius: 16px; background: #FFFDF9; box-shadow: 0 1px 3px rgba(26,23,20,0.07); color: #A0968A; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center;">D</div>
+        <div style="flex: 1; height: 46px; border-radius: 16px; background: #123B2E; color: #F2EDE4; font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center;">S</div>
+        <div style="flex: 1; height: 46px; border-radius: 16px; background: #FFFDF9; box-shadow: 0 1px 3px rgba(26,23,20,0.07); color: #A0968A; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center;">T</div>
+        <div style="flex: 1; height: 46px; border-radius: 16px; background: #123B2E; color: #F2EDE4; font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center;">Q</div>
+        <div style="flex: 1; height: 46px; border-radius: 16px; background: #FFFDF9; box-shadow: 0 1px 3px rgba(26,23,20,0.07); color: #A0968A; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center;">Q</div>
+        <div style="flex: 1; height: 46px; border-radius: 16px; background: #FFFDF9; box-shadow: 0 1px 3px rgba(26,23,20,0.07); color: #A0968A; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center;">S</div>
+        <div style="flex: 1; height: 46px; border-radius: 16px; background: #FFFDF9; box-shadow: 0 1px 3px rgba(26,23,20,0.07); color: #A0968A; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center;">S</div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 22px; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 10px;"><div style="width: 24px; height: 24px; border-radius: 8px; background: #123B2E; display: flex; align-items: center; justify-content: center;"><span class="ms" style="font-size: 17px; color: #FFD65A;">check</span></div><span style="font-size: 13.5px; color: #6E655B;">checkbox</span></div>
+        <div style="display: flex; align-items: center; gap: 10px;"><div style="width: 26px; height: 26px; border-radius: 999px; background: #123B2E; display: flex; align-items: center; justify-content: center;"><span class="ms" style="font-size: 17px; color: #FFD65A;">check</span></div><div style="width: 26px; height: 26px; border-radius: 999px; border: 2.5px solid #C9BFB2;"></div><span style="font-size: 13.5px; color: #6E655B;">rádio</span></div>
+        <div style="display: flex; align-items: center; gap: 10px;"><div style="width: 46px; height: 27px; border-radius: 999px; background: #123B2E; display: flex; align-items: center; justify-content: flex-end; padding: 0 3px;"><div style="width: 21px; height: 21px; border-radius: 999px; background: #FFD65A;"></div></div><div style="width: 46px; height: 27px; border-radius: 999px; background: #E2DACD; display: flex; align-items: center; padding: 0 3px;"><div style="width: 21px; height: 21px; border-radius: 999px; background: #FFFDF9;"></div></div><span style="font-size: 13.5px; color: #6E655B;">switch</span></div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <div style="display: flex; gap: 7px;"><div style="width: 24px; height: 7px; border-radius: 999px; background: #123B2E;"></div><div style="width: 7px; height: 7px; border-radius: 999px; background: #D3C9BB;"></div><div style="width: 7px; height: 7px; border-radius: 999px; background: #D3C9BB;"></div></div>
+        <span style="font-size: 13.5px; color: #6E655B;">indicador de passo / onboarding</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section style="padding: 8px 56px 48px; font-family: Manrope, system-ui, sans-serif; color: #1A1714; display: flex; flex-direction: column; gap: 20px;">
+  <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: #9A9086;">06 · CARTÃO DE TAREFA — CINCO ESTADOS</div>
+  <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+
+    <div style="width: 420px; display: flex; flex-direction: column; gap: 12px;">
+      <div style="background: #FFFDF9; border-radius: 22px; padding: 16px 18px; display: flex; align-items: center; gap: 14px; box-shadow: 0 2px 8px rgba(26,23,20,0.07);">
+        <div style="width: 30px; height: 30px; border-radius: 999px; border: 2.5px solid #C9BFB2; flex-shrink: 0;"></div>
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 3px;"><div style="font-size: 17px; font-weight: 700; letter-spacing: -0.01em;">Lavar a louça do almoço</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: #A0968A; letter-spacing: 0.04em;">14:00 · MARINA</div></div>
+        <div style="width: 34px; height: 34px; border-radius: 999px; background: #123B2E; color: #F2EDE4; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center;">MA</div>
+      </div>
+      <div style="font-size: 13px; color: #6E655B; padding-left: 4px;"><strong>Pendente</strong> — estado base. Checkbox 30px com contorno de 2,5px.</div>
+
+      <div style="background: #FFFDF9; border-radius: 22px; padding: 16px 18px; display: flex; align-items: center; gap: 14px; box-shadow: 0 2px 8px rgba(26,23,20,0.07);">
+        <div style="width: 30px; height: 30px; border-radius: 999px; background: #123B2E; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><span class="ms" style="font-size: 19px; color: #FFD65A;">check</span></div>
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 3px;"><div style="font-size: 17px; font-weight: 700; letter-spacing: -0.01em; color: #A0968A; text-decoration: line-through;">Regar as plantas</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: #A0968A; letter-spacing: 0.04em;">FEITO 08:12 · JOANA</div></div>
+        <div style="width: 34px; height: 34px; border-radius: 999px; background: #D9C7A8; color: #4A3A22; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center;">JO</div>
+      </div>
+      <div style="font-size: 13px; color: #6E655B; padding-left: 4px;"><strong>Concluída</strong> — círculo cheio, título riscado em cinza, hora do feito.</div>
+
+      <div style="background: #FFE9E0; border-radius: 22px; padding: 16px 18px; display: flex; align-items: center; gap: 14px; box-shadow: 0 2px 8px rgba(199,56,31,0.10);">
+        <div style="width: 30px; height: 30px; border-radius: 999px; border: 2.5px solid #C7381F; flex-shrink: 0;"></div>
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 3px;"><div style="font-size: 17px; font-weight: 700; letter-spacing: -0.01em;">Tirar o lixo reciclável</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: #C7381F; letter-spacing: 0.04em;">ONTEM 20:00 · PEDRO</div></div>
+        <div style="width: 34px; height: 34px; border-radius: 999px; background: #F0A98C; color: #5A2A16; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center;">PE</div>
+      </div>
+      <div style="font-size: 13px; color: #6E655B; padding-left: 4px;"><strong>Atrasada</strong> — fundo, contorno e metadado em vermelho. A tarefa venceu; a pessoa não falhou.</div>
+
+      <div style="background: #FFFDF9; border-radius: 22px; padding: 16px 18px; display: flex; align-items: center; gap: 14px; box-shadow: 0 2px 8px rgba(26,23,20,0.07); opacity: 0.72;">
+        <div style="width: 30px; height: 30px; border-radius: 999px; border: 2.5px dashed #C9BFB2; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><span class="ms" style="font-size: 16px; color: #A0968A;">schedule</span></div>
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 3px;"><div style="font-size: 17px; font-weight: 700; letter-spacing: -0.01em;">Compras da semana</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: #A0968A; letter-spacing: 0.04em;">ADIADA P/ QUA · CARLOS</div></div>
+        <div style="width: 34px; height: 34px; border-radius: 999px; background: #A8C4B6; color: #17402F; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center;">CA</div>
+      </div>
+      <div style="font-size: 13px; color: #6E655B; padding-left: 4px;"><strong>Adiada</strong> — contorno tracejado com relógio, cartão a 72%.</div>
+
+      <div style="background: #FFFDF9; border-radius: 22px; padding: 16px 18px; display: flex; align-items: center; gap: 14px; box-shadow: 0 0 0 2px #123B2E;">
+        <div style="width: 30px; height: 30px; border-radius: 999px; border: 2.5px solid #C9BFB2; flex-shrink: 0;"></div>
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 3px;"><div style="font-size: 17px; font-weight: 700; letter-spacing: -0.01em;">Buscar a Lia na escola</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: #A0968A; letter-spacing: 0.04em;">18:30 · CARLOS</div></div>
+        <span class="ms" style="font-size: 22px; color: #123B2E;">drag_indicator</span>
+      </div>
+      <div style="font-size: 13px; color: #6E655B; padding-left: 4px;"><strong>Selecionada / em edição</strong> — anel de 2px, sem sombra extra.</div>
+    </div>
+
+    <div style="width: 420px; background: #18211D; border-radius: 22px; padding: 24px; display: flex; flex-direction: column; gap: 12px; color: #F3EFE6;">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; color: #6F7A73;">OS MESMOS ESTADOS NO NOITE</div>
+      <div style="background: #0E1311; border: 1px solid rgba(243,239,230,0.07); border-radius: 22px; padding: 16px 18px; display: flex; align-items: center; gap: 14px;">
+        <div style="width: 30px; height: 30px; border-radius: 999px; border: 2.5px solid #4C5A52; flex-shrink: 0;"></div>
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 3px;"><div style="font-size: 17px; font-weight: 700;">Lavar a louça do almoço</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: #7A857D; letter-spacing: 0.04em;">14:00 · MARINA</div></div>
+        <div style="width: 34px; height: 34px; border-radius: 999px; background: #F2C744; color: #2A2306; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center;">MA</div>
+      </div>
+      <div style="background: #0E1311; border: 1px solid rgba(243,239,230,0.07); border-radius: 22px; padding: 16px 18px; display: flex; align-items: center; gap: 14px;">
+        <div style="width: 30px; height: 30px; border-radius: 999px; background: #F2C744; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><span class="ms" style="font-size: 19px; color: #2A2306;">check</span></div>
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 3px;"><div style="font-size: 17px; font-weight: 700; color: #6F7A73; text-decoration: line-through;">Regar as plantas</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: #6F7A73; letter-spacing: 0.04em;">FEITO 08:12 · JOANA</div></div>
+        <div style="width: 34px; height: 34px; border-radius: 999px; background: #3A4A40; color: #D6DDD5; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center;">JO</div>
+      </div>
+      <div style="background: #241813; border: 1px solid rgba(255,122,77,0.28); border-radius: 22px; padding: 16px 18px; display: flex; align-items: center; gap: 14px;">
+        <div style="width: 30px; height: 30px; border-radius: 999px; border: 2.5px solid #FF7A4D; flex-shrink: 0;"></div>
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 3px;"><div style="font-size: 17px; font-weight: 700;">Tirar o lixo reciclável</div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: #FF9973; letter-spacing: 0.04em;">ONTEM 20:00 · PEDRO</div></div>
+        <div style="width: 34px; height: 34px; border-radius: 999px; background: #4A3B33; color: #F0C3AC; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center;">PE</div>
+      </div>
+      <div style="font-size: 13px; color: #8F9A91; line-height: 1.5; margin-top: 4px;">A troca é mecânica: superfície, fio, texto e cor de destaque. Geometria, pesos e hierarquia não mudam entre os temas.</div>
+    </div>
+
+  </div>
+</section>
+
+<section style="padding: 8px 56px 48px; font-family: Manrope, system-ui, sans-serif; color: #1A1714; display: flex; flex-direction: column; gap: 20px;">
+  <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: #9A9086;">07 · PESSOAS E SINAIS</div>
+  <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+
+    <div style="flex: 1; min-width: 360px; background: #FFFDF9; border-radius: 22px; padding: 24px; box-shadow: 0 2px 10px rgba(26,23,20,0.07); display: flex; flex-direction: column; gap: 18px;">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; color: #A0968A;">AVATARES</div>
+      <div style="display: flex; align-items: flex-end; gap: 14px; flex-wrap: wrap;">
+        <div style="width: 62px; height: 62px; border-radius: 999px; background: #123B2E; color: #F2EDE4; font-size: 20px; font-weight: 800; display: flex; align-items: center; justify-content: center;">MA</div>
+        <div style="width: 44px; height: 44px; border-radius: 999px; background: #D9C7A8; color: #4A3A22; font-size: 14px; font-weight: 800; display: flex; align-items: center; justify-content: center;">JO</div>
+        <div style="width: 34px; height: 34px; border-radius: 999px; background: #F0A98C; color: #5A2A16; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center;">PE</div>
+        <div style="width: 30px; height: 30px; border-radius: 999px; background: #A8C4B6; color: #17402F; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center;">CA</div>
+        <div style="display: flex; align-items: center; margin-left: 8px;">
+          <div style="width: 34px; height: 34px; border-radius: 999px; background: #D9C7A8; color: #4A3A22; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; border: 2px solid #FFFDF9;">JO</div>
+          <div style="width: 34px; height: 34px; border-radius: 999px; background: #F0A98C; color: #5A2A16; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; border: 2px solid #FFFDF9; margin-left: -10px;">PE</div>
+          <div style="width: 34px; height: 34px; border-radius: 999px; background: #A8C4B6; color: #17402F; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; border: 2px solid #FFFDF9; margin-left: -10px;">CA</div>
+        </div>
+      </div>
+      <div style="font-size: 13px; color: #6E655B; line-height: 1.5;">Tamanhos 62 / 44 / 34 / 30. Duas letras, peso 800. Pilha com −9 a −10px e borda de 2px na cor do contêiner. Cada pessoa tem um par fixo de cores (fundo e texto) que se repete em todo o app.</div>
+      <div style="height: 1px; background: #EFE8DC;"></div>
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; color: #A0968A;">SELOS E SINAIS</div>
+      <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+        <div style="height: 24px; padding: 0 10px; border-radius: 999px; background: #FFD65A; color: #4A3A22; font-size: 10px; font-weight: 800; letter-spacing: 0.06em; display: flex; align-items: center;">ADM</div>
+        <div style="height: 24px; padding: 0 10px; border-radius: 999px; background: #EFE8DC; color: #6E655B; font-size: 10px; font-weight: 800; letter-spacing: 0.06em; display: flex; align-items: center;">MEMBRO</div>
+        <div style="height: 28px; padding: 0 12px; border-radius: 999px; background: #FFD65A; color: #4A3A22; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.08em; display: flex; align-items: center;">PENDENTE · HOJE 14:00</div>
+        <div style="display: flex; align-items: center; gap: 8px;"><div style="width: 8px; height: 8px; border-radius: 999px; background: #7BD8A6; box-shadow: 0 0 0 4px rgba(123,216,166,0.18);"></div><span style="font-size: 13px; color: #6E655B;">na casa agora</span></div>
+        <div style="position: relative; width: 38px; height: 38px; border-radius: 999px; background: #FFFDF9; box-shadow: 0 1px 3px rgba(26,23,20,0.10); display: flex; align-items: center; justify-content: center;"><span class="ms" style="font-size: 21px;">notifications</span><div style="position: absolute; top: 8px; right: 9px; width: 8px; height: 8px; border-radius: 999px; background: #FF5A2B; border: 2px solid #FFFDF9;"></div></div>
+      </div>
+    </div>
+
+    <div style="flex: 1; min-width: 360px; background: #FFFDF9; border-radius: 22px; padding: 24px; box-shadow: 0 2px 10px rgba(26,23,20,0.07); display: flex; flex-direction: column; gap: 18px;">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; color: #A0968A;">PROGRESSO</div>
+      <div style="display: flex; align-items: center; gap: 24px; flex-wrap: wrap;">
+        <div style="width: 82px; height: 82px; border-radius: 999px; background: conic-gradient(#FFD65A 0deg 154deg, #EFE8DC 154deg 360deg); display: flex; align-items: center; justify-content: center;"><div style="width: 62px; height: 62px; border-radius: 999px; background: #FFFDF9; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono', monospace; font-size: 15px; color: #8A6A18;">43%</div></div>
+        <div style="flex: 1; min-width: 160px; display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 12px;"><div style="flex: 1; height: 8px; border-radius: 999px; background: #EAE2D5; overflow: hidden;"><div style="width: 43%; height: 100%; background: #123B2E; border-radius: 999px;"></div></div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #6E655B;">3/7</div></div>
+          <div style="display: flex; align-items: center; gap: 12px;"><div style="flex: 1; height: 8px; border-radius: 999px; background: #EAE2D5; overflow: hidden;"><div style="width: 100%; height: 100%; background: #123B2E; border-radius: 999px;"></div></div><div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: #123B2E;">2/2</div></div>
+        </div>
+      </div>
+      <div style="font-size: 13px; color: #6E655B; line-height: 1.5;">O anel é o mesmo desenho do símbolo da marca fechando. Sobre verde, o preenchimento é manteiga e o trilho fica a 16% de branco; sobre areia, preenchimento verde e trilho <span style="font-family: 'IBM Plex Mono', monospace;">#EAE2D5</span>.</div>
+      <div style="height: 1px; background: #EFE8DC;"></div>
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; color: #A0968A;">AVISO E DICA</div>
+      <div style="background: #FFF1D6; border-radius: 20px; padding: 14px 16px; display: flex; align-items: center; gap: 12px;"><span class="ms" style="font-size: 22px; color: #8A6A18;">bolt</span><div style="font-size: 13.5px; color: #6A5518; line-height: 1.4;">Joana já tem <strong>3 tarefas</strong> na segunda. Quer distribuir?</div></div>
+    </div>
+
+  </div>
+</section>
+
+<section style="padding: 8px 56px 48px; font-family: Manrope, system-ui, sans-serif; color: #1A1714; display: flex; flex-direction: column; gap: 20px;">
+  <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: #9A9086;">08 · NAVEGAÇÃO</div>
+  <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+
+    <div style="width: 402px; display: flex; flex-direction: column; gap: 12px;">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; color: #A0968A;">iOS · CABEÇALHO</div>
+      <div style="background: #F2EDE4; border: 1px solid #E2DACD; border-radius: 22px; padding: 18px 22px; display: flex; align-items: flex-start; justify-content: space-between;">
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: #A0968A;">SEG · 27 JUL</div>
+          <div style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 30px; font-weight: 800; letter-spacing: -0.035em; line-height: 1;">Bom dia, Marina</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="position: relative; width: 38px; height: 38px; border-radius: 999px; background: #FFFDF9; box-shadow: 0 1px 3px rgba(26,23,20,0.10); display: flex; align-items: center; justify-content: center;"><span class="ms" style="font-size: 21px;">notifications</span><div style="position: absolute; top: 8px; right: 9px; width: 8px; height: 8px; border-radius: 999px; background: #FF5A2B; border: 2px solid #FFFDF9;"></div></div>
+          <div style="width: 38px; height: 38px; border-radius: 999px; background: #123B2E; color: #F2EDE4; font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center;">MA</div>
+        </div>
+      </div>
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; color: #A0968A; margin-top: 6px;">iOS · BARRA DE ABAS (62px)</div>
+      <div style="height: 62px; border-radius: 999px; background: #FFFDF9; box-shadow: 0 4px 16px rgba(26,23,20,0.10); display: flex; align-items: center; padding: 0 8px;">
+        <div style="flex: 1; height: 46px; border-radius: 999px; background: #123B2E; color: #F2EDE4; display: flex; align-items: center; justify-content: center; gap: 7px; font-size: 13px; font-weight: 700;"><span class="ms" style="font-size: 20px;">check_circle</span>Hoje</div>
+        <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; color: #A0968A;"><span class="ms" style="font-size: 22px;">calendar_month</span><span style="font-size: 11px; font-weight: 600;">Agenda</span></div>
+        <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; color: #A0968A;"><span class="ms" style="font-size: 22px;">group</span><span style="font-size: 11px; font-weight: 600;">Casa</span></div>
+        <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; color: #A0968A;"><span class="ms" style="font-size: 22px;">person</span><span style="font-size: 11px; font-weight: 600;">Perfil</span></div>
+      </div>
+      <div style="font-size: 13px; color: #6E655B; line-height: 1.5;">A aba ativa vira pílula sólida com ícone e rótulo lado a lado; as demais ficam empilhadas. A barra flutua com margem lateral de 22px e fade de fundo por baixo.</div>
+    </div>
+
+    <div style="width: 412px; display: flex; flex-direction: column; gap: 12px;">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; color: #A0968A;">ANDROID · MATERIAL 3</div>
+      <div style="background: #EFE8DC; border-radius: 22px; height: 80px; display: flex; align-items: flex-start; padding-top: 12px;">
+        <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;"><div style="width: 64px; height: 32px; border-radius: 16px; background: #123B2E; display: flex; align-items: center; justify-content: center;"><span class="ms" style="font-size: 22px; color: #FFD65A;">check_circle</span></div><span style="font-size: 12px; font-weight: 600;">Hoje</span></div>
+        <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;"><div style="width: 64px; height: 32px; display: flex; align-items: center; justify-content: center;"><span class="ms" style="font-size: 22px; color: #6E655B;">calendar_month</span></div><span style="font-size: 12px; color: #6E655B;">Agenda</span></div>
+        <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;"><div style="width: 64px; height: 32px; display: flex; align-items: center; justify-content: center;"><span class="ms" style="font-size: 22px; color: #6E655B;">group</span></div><span style="font-size: 12px; color: #6E655B;">Casa</span></div>
+        <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;"><div style="width: 64px; height: 32px; display: flex; align-items: center; justify-content: center;"><span class="ms" style="font-size: 22px; color: #6E655B;">person</span></div><span style="font-size: 12px; color: #6E655B;">Perfil</span></div>
+      </div>
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <div style="height: 56px; padding: 0 20px; border-radius: 16px; background: #FF5A2B; color: #fff; display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 500;"><span class="ms" style="font-size: 22px;">add</span>Nova tarefa</div>
+        <div style="height: 56px; padding: 0 24px; border-radius: 999px; background: #123B2E; color: #F2EDE4; display: flex; align-items: center; font-size: 15px; font-weight: 500;">Botão M3</div>
+      </div>
+      <div style="height: 60px; border-radius: 8px 8px 0 0; background: #EFE8DC; border-bottom: 2px solid #123B2E; padding: 0 16px; display: flex; flex-direction: column; justify-content: center; gap: 2px;">
+        <div style="font-size: 12px; color: #123B2E;">Título da tarefa</div>
+        <div style="font-size: 17px; font-weight: 500;">Passar aspirador na sala</div>
+      </div>
+      <div style="font-size: 13px; color: #6E655B; line-height: 1.5;">Diferenças de plataforma: barra de navegação de 80px com indicador em pílula 64×32; FAB estendido de canto 16; campos com rótulo flutuante e sublinhado de 2px; chips e selos de canto 8; corpo em Roboto. Cores, hierarquia e conteúdo são idênticos ao iOS.</div>
+    </div>
+
+    <div style="width: 402px; display: flex; flex-direction: column; gap: 12px;">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; color: #A0968A;">BOTTOM SHEET</div>
+      <div style="background: #F2EDE4; border: 1px solid #E2DACD; border-radius: 34px 34px 22px 22px; padding: 14px 22px 22px; display: flex; flex-direction: column; gap: 18px;">
+        <div style="width: 44px; height: 5px; border-radius: 999px; background: #D3C9BB; align-self: center;"></div>
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <div style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 28px; font-weight: 800; letter-spacing: -0.035em; line-height: 1.05;">Mudar só esta semana</div>
+          <div style="font-size: 14.5px; color: #6E655B; line-height: 1.45;">A rotina fixa continua igual depois de domingo.</div>
+        </div>
+        <div style="background: #FFFDF9; border-radius: 22px; padding: 16px 18px; display: flex; align-items: center; gap: 14px; box-shadow: 0 0 0 2px #123B2E;">
+          <div style="width: 26px; height: 26px; border-radius: 999px; background: #123B2E; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"><span class="ms" style="font-size: 17px; color: #FFD65A;">check</span></div>
+          <div style="flex: 1; display: flex; flex-direction: column; gap: 2px;"><div style="font-size: 16px; font-weight: 700;">Passar para outra pessoa</div><div style="font-size: 13px; color: #8A8076;">Pedro assume terça e quinta</div></div>
+        </div>
+      </div>
+      <div style="font-size: 13px; color: #6E655B; line-height: 1.5;">Alça de 44×5px centralizada, raio 34 no topo, scrim <span style="font-family: 'IBM Plex Mono', monospace;">rgba(26,23,20,0.34)</span> no dia e <span style="font-family: 'IBM Plex Mono', monospace;">rgba(4,7,6,0.62)</span> na noite.</div>
+    </div>
+
+  </div>
+</section>
+
+<section style="padding: 8px 56px 48px; font-family: Manrope, system-ui, sans-serif; color: #1A1714; display: flex; flex-direction: column; gap: 20px;">
+  <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: #9A9086;">09 · ESTADOS DE TELA</div>
+  <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+
+    <div style="width: 380px; background: #F2EDE4; border: 1px solid #E2DACD; border-radius: 22px; padding: 34px 26px; display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center;">
+      <div style="width: 72px; height: 72px; border-radius: 999px; background: #EFE8DC; display: flex; align-items: center; justify-content: center;"><span class="ms" style="font-size: 34px; color: #A0968A;">task_alt</span></div>
+      <div style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 24px; font-weight: 800; letter-spacing: -0.03em;">Tudo em dia por aqui</div>
+      <div style="font-size: 14.5px; color: #6E655B; line-height: 1.5;">Nenhuma tarefa para hoje. Que tal combinar a rotina da semana?</div>
+      <div style="height: 50px; padding: 0 22px; border-radius: 999px; background: #FF5A2B; color: #fff; font-size: 15px; font-weight: 800; display: flex; align-items: center; gap: 8px; margin-top: 4px;"><span class="ms" style="font-size: 20px;">add</span>Criar tarefa</div>
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; color: #A0968A; margin-top: 6px;">VAZIO</div>
+    </div>
+
+    <div style="width: 380px; background: #F2EDE4; border: 1px solid #E2DACD; border-radius: 22px; padding: 26px; display: flex; flex-direction: column; gap: 12px;">
+      <div style="background: #FFFDF9; border-radius: 22px; padding: 16px 18px; display: flex; align-items: center; gap: 14px;">
+        <div style="width: 30px; height: 30px; border-radius: 999px; background: #EFE8DC; flex-shrink: 0;"></div>
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 7px;"><div style="height: 13px; width: 72%; border-radius: 999px; background: #EFE8DC;"></div><div style="height: 10px; width: 44%; border-radius: 999px; background: #F3EEE5;"></div></div>
+        <div style="width: 34px; height: 34px; border-radius: 999px; background: #EFE8DC;"></div>
+      </div>
+      <div style="background: #FFFDF9; border-radius: 22px; padding: 16px 18px; display: flex; align-items: center; gap: 14px;">
+        <div style="width: 30px; height: 30px; border-radius: 999px; background: #EFE8DC; flex-shrink: 0;"></div>
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 7px;"><div style="height: 13px; width: 58%; border-radius: 999px; background: #EFE8DC;"></div><div style="height: 10px; width: 36%; border-radius: 999px; background: #F3EEE5;"></div></div>
+        <div style="width: 34px; height: 34px; border-radius: 999px; background: #EFE8DC;"></div>
+      </div>
+      <div style="background: #FFFDF9; border-radius: 22px; padding: 16px 18px; display: flex; align-items: center; gap: 14px; opacity: 0.6;">
+        <div style="width: 30px; height: 30px; border-radius: 999px; background: #EFE8DC; flex-shrink: 0;"></div>
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 7px;"><div style="height: 13px; width: 66%; border-radius: 999px; background: #EFE8DC;"></div><div style="height: 10px; width: 40%; border-radius: 999px; background: #F3EEE5;"></div></div>
+        <div style="width: 34px; height: 34px; border-radius: 999px; background: #EFE8DC;"></div>
+      </div>
+      <div style="font-size: 13px; color: #6E655B; line-height: 1.5; margin-top: 4px;">Esqueleto no formato exato do cartão, três linhas, pulsação de 1,2s. Nunca spinner de tela cheia.</div>
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; color: #A0968A;">CARREGANDO</div>
+    </div>
+
+    <div style="width: 380px; background: #F2EDE4; border: 1px solid #E2DACD; border-radius: 22px; padding: 34px 26px; display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center;">
+      <div style="width: 72px; height: 72px; border-radius: 999px; background: #FFE9E0; display: flex; align-items: center; justify-content: center;"><span class="ms" style="font-size: 34px; color: #C7381F;">cloud_off</span></div>
+      <div style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 24px; font-weight: 800; letter-spacing: -0.03em;">Sem conexão agora</div>
+      <div style="font-size: 14.5px; color: #6E655B; line-height: 1.5;">Mostrando o último quadro salvo. O que você marcar será enviado quando a internet voltar.</div>
+      <div style="height: 50px; padding: 0 22px; border-radius: 999px; border: 1.5px solid #D3C9BB; color: #6E655B; font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; margin-top: 4px;"><span class="ms" style="font-size: 20px;">refresh</span>Tentar de novo</div>
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; color: #A0968A; margin-top: 6px;">ERRO</div>
+    </div>
+
+  </div>
+</section>
+
+<section style="padding: 8px 56px 80px; font-family: Manrope, system-ui, sans-serif; color: #1A1714; display: flex; flex-direction: column; gap: 20px;">
+  <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.16em; color: #9A9086;">10 · MOVIMENTO E ESCRITA</div>
+  <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+
+    <div style="flex: 1; min-width: 380px; background: #FFFDF9; border-radius: 22px; padding: 24px; box-shadow: 0 2px 10px rgba(26,23,20,0.07); display: flex; flex-direction: column; gap: 14px;">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; color: #A0968A;">MOVIMENTO</div>
+      <div style="font-size: 13.5px; color: #6E655B; line-height: 1.6;">
+        <strong style="color: #1A1714;">Curva única:</strong> <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px;">cubic-bezier(0.2, 0.8, 0.2, 1)</span>.<br />
+        <strong style="color: #1A1714;">120ms</strong> toque e realce · <strong style="color: #1A1714;">220ms</strong> transição de estado dentro da tela · <strong style="color: #1A1714;">420ms</strong> conclusão de tarefa, abertura do app e navegação entre telas.<br />
+        Concluir soma três coisas ao mesmo tempo: o círculo preenche, o número do hero incrementa e o anel avança. Nada pisca, nada gira.
+      </div>
+    </div>
+
+    <div style="flex: 1; min-width: 380px; background: #FFFDF9; border-radius: 22px; padding: 24px; box-shadow: 0 2px 10px rgba(26,23,20,0.07); display: flex; flex-direction: column; gap: 14px;">
+      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; color: #A0968A;">COMO ESCREVEMOS</div>
+      <div style="display: flex; gap: 12px; align-items: flex-start;"><span class="ms" style="font-size: 20px; color: #123B2E;">check</span><div style="flex: 1; font-size: 14px; line-height: 1.5;"><strong>"Joana concluiu Regar as plantas."</strong> <span style="color: #8A8076;">Fato, nome e hora.</span></div></div>
+      <div style="display: flex; gap: 12px; align-items: flex-start;"><span class="ms" style="font-size: 20px; color: #123B2E;">check</span><div style="flex: 1; font-size: 14px; line-height: 1.5;"><strong>"Tirar o lixo venceu ontem."</strong> <span style="color: #8A8076;">A tarefa venceu; a pessoa não falhou.</span></div></div>
+      <div style="display: flex; gap: 12px; align-items: flex-start;"><span class="ms" style="font-size: 20px; color: #C7381F;">close</span><div style="flex: 1; font-size: 14px; line-height: 1.5; color: #8A8076;">"Você está atrasado de novo!" — sem culpa, sem exclamação, sem emoji corrigindo alguém.</div></div>
+      <div style="font-size: 13px; color: #6E655B; line-height: 1.5; margin-top: 4px;">Rótulos em mono são sempre caixa alta e curtos (uma a três palavras). Botões usam verbo no infinitivo: Criar, Concluir, Salvar, Continuar.</div>
+    </div>
+
+  </div>
+</section>
+</x-dc>
+</body>
+</html>
