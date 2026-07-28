@@ -110,7 +110,9 @@ class InvitationPreviewView(APIView):
             {
                 "environment_name": environment.name,
                 "env_type": environment.env_type,
-                "member_count": environment.memberships.count(),
+                "member_count": environment.memberships.filter(
+                    status=Membership.Status.ACTIVE
+                ).count(),
                 "members": members,
                 "invited_by_name": invitation.invited_by.display_name
                 or invitation.invited_by.email,

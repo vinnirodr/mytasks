@@ -161,6 +161,7 @@ export default function AcceptInviteScreen() {
                       initials: member.initials,
                     }))}
                     size={44}
+                    max={5}
                     borderColor={colors.forest}
                   />
                 </View>

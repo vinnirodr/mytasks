@@ -29,7 +29,7 @@ export default function JoinScreen() {
 
   function handleContinue() {
     if (!canContinue) return;
-    router.push(`/(auth)/invite/${trimmedToken}`);
+    router.push(`/(auth)/invite/${encodeURIComponent(trimmedToken)}`);
   }
 
   return (
@@ -66,7 +66,7 @@ export default function JoinScreen() {
               label="Código do convite"
               value={token}
               onChangeText={setToken}
-              placeholder="Ex: AB12CD34"
+              placeholder="Cole o código do convite"
               autoCapitalize="none"
             />
           </View>

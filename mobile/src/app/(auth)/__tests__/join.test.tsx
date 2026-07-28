@@ -28,7 +28,7 @@ beforeEach(() => {
 test("entering a token and pressing 'Continuar' navigates to the invite route with that token", () => {
   renderScreen();
 
-  fireEvent.changeText(screen.getByPlaceholderText("Ex: AB12CD34"), "abc123");
+  fireEvent.changeText(screen.getByPlaceholderText("Cole o código do convite"), "abc123");
   fireEvent.press(screen.getByText("Continuar"));
 
   expect(mockPush).toHaveBeenCalledWith("/(auth)/invite/abc123");
@@ -45,7 +45,7 @@ test("an empty field leaves 'Continuar' disabled and does not navigate", () => {
 test("a whitespace-only token leaves 'Continuar' disabled and does not navigate", () => {
   renderScreen();
 
-  fireEvent.changeText(screen.getByPlaceholderText("Ex: AB12CD34"), "   ");
+  fireEvent.changeText(screen.getByPlaceholderText("Cole o código do convite"), "   ");
   fireEvent.press(screen.getByText("Continuar"));
 
   expect(mockPush).not.toHaveBeenCalled();
