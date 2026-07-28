@@ -106,6 +106,17 @@ export default function LoginScreen() {
               </Pressable>
             </Link>
           </View>
+
+          <View style={styles.footer}>
+            <Text color="inkMuted">Recebeu um convite? </Text>
+            <Link href="/(auth)/join" asChild>
+              <Pressable>
+                <Text variant="bodyStrong" color={theme.action}>
+                  Inserir código
+                </Text>
+              </Pressable>
+            </Link>
+          </View>
         </ScrollView>
       </SafeAreaView>
     </View>

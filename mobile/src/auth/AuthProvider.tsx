@@ -12,7 +12,10 @@ import { createContext, useCallback, useEffect, useMemo, useState, type ReactNod
 
 import { authApi, type AuthUser } from "@/api/auth";
 import { apiClient } from "@/api/client";
+import { invitesApi } from "@/api/invites";
 import { tokenStore } from "@/api/tokenStore";
+
+import { takePendingInvite } from "./pendingInvite";
 
 export type AuthStatus = "loading" | "signedOut" | "signedIn";
 
@@ -84,10 +87,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const me = await authApi.me();
       setUser(me);
       setStatus("signedIn");
+      acceptPendingInvite();
     } catch (error) {
       await tokenStore.clear();
       throw error;
     }
+  }
+
+  /**
+   * Best-effort: a token stashed by the accept-invite screen
+   * ((auth)/invite/[token]) before sending a signed-out user to
+   * register/login gets accepted here once the session is established.
+   * Failures are swallowed — the user already reached the app; a failed
+   * invite accept shouldn't block or interrupt that.
+   */
+  function acceptPendingInvite() {
+    const token = takePendingInvite();
+    if (!token) return;
+    invitesApi.accept(token).catch((error: unknown) => {
+      console.warn("Failed to accept pending invite", error);
+    });
   }
 
   async function register(email: string, password: string, displayName: string) {
