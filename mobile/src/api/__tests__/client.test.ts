@@ -37,6 +37,16 @@ describe("apiClient", () => {
     const [url, options] = mockFetch.mock.calls[0];
     expect(url).toContain("/api/tasks/1/");
     expect(options.headers.Authorization).toBe("Bearer access-token");
+    expect(options.headers["Content-Type"]).toBeUndefined();
+  });
+
+  test("request with a body sends Content-Type: application/json", async () => {
+    mockGetAccess.mockResolvedValue("access-token");
+    mockFetch.mockResolvedValueOnce(jsonResponse(200, { ok: true }));
+
+    await apiClient.request("/api/tasks/", { method: "POST", body: { name: "Task" } });
+
+    const [, options] = mockFetch.mock.calls[0];
     expect(options.headers["Content-Type"]).toBe("application/json");
   });
 
@@ -131,6 +141,29 @@ describe("apiClient", () => {
     expect(mockClear).toHaveBeenCalledTimes(1);
     expect(onUnauthorized).toHaveBeenCalledTimes(1);
     expect(mockFetch).toHaveBeenCalledTimes(1);
+  });
+
+  test("401 on the post-refresh retry clears tokens, calls onUnauthorized, and throws ApiError", async () => {
+    const onUnauthorized = jest.fn();
+    apiClient.setOnUnauthorized(onUnauthorized);
+
+    mockGetAccess.mockResolvedValue("expired-access");
+    mockGetRefresh.mockResolvedValue("refresh-token");
+    mockSetTokens.mockResolvedValue(undefined);
+    mockClear.mockResolvedValue(undefined);
+
+    mockFetch
+      .mockResolvedValueOnce(jsonResponse(401, { detail: "expired" })) // original call, fails
+      .mockResolvedValueOnce(jsonResponse(200, { access: "new-access", refresh: "new-refresh" })) // refresh call succeeds
+      .mockResolvedValueOnce(jsonResponse(401, { detail: "still expired" })); // retried original call, still 401
+
+    await expect(apiClient.request("/api/tasks/1/")).rejects.toMatchObject({
+      status: 401,
+    });
+
+    expect(mockFetch).toHaveBeenCalledTimes(3);
+    expect(mockClear).toHaveBeenCalledTimes(1);
+    expect(onUnauthorized).toHaveBeenCalledTimes(1);
   });
 
   test("non-2xx (non-401) response throws ApiError with status and data", async () => {

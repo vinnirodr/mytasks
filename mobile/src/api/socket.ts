@@ -15,15 +15,17 @@ const MAX_BACKOFF_MS = 15000;
 
 /**
  * Opens a WebSocket connection to an environment's real-time channel,
- * authenticating via the `["jwt", accessToken]` subprotocol. Incoming
- * messages are JSON-parsed and handed to `onMessage` (malformed payloads are
- * swallowed). If the connection drops and `close()` was not called, it
- * reconnects automatically with a capped exponential backoff, reusing the
- * same envId/token/handlers.
+ * authenticating via the `["jwt", accessToken]` subprotocol. The token is
+ * read fresh via `getToken()` on every (re)connect so an expired captured
+ * token isn't reused forever; if it resolves to null, the socket does not
+ * open. Incoming messages are JSON-parsed and handed to `onMessage`
+ * (malformed payloads are swallowed). If the connection drops and `close()`
+ * was not called, it reconnects automatically with a capped exponential
+ * backoff, reusing the same envId/getToken/handlers.
  */
 export function createEnvironmentSocket(
   envId: string,
-  accessToken: string,
+  getToken: () => Promise<string | null>,
   handlers: SocketHandlers,
 ): EnvironmentSocket {
   let closed = false;
@@ -31,9 +33,19 @@ export function createEnvironmentSocket(
   let backoffMs = INITIAL_BACKOFF_MS;
   let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
-  function connect(): void {
+  async function connect(): Promise<void> {
+    const token = await getToken();
+
+    if (closed) {
+      return;
+    }
+
+    if (!token) {
+      return;
+    }
+
     const url = `${config.wsBaseUrl}/ws/environments/${envId}/`;
-    socket = new WebSocket(url, ["jwt", accessToken]);
+    socket = new WebSocket(url, ["jwt", token]);
 
     socket.onopen = () => {
       backoffMs = INITIAL_BACKOFF_MS;
@@ -58,12 +70,12 @@ export function createEnvironmentSocket(
 
       reconnectTimer = setTimeout(() => {
         backoffMs = Math.min(backoffMs * 2, MAX_BACKOFF_MS);
-        connect();
+        void connect();
       }, backoffMs);
     };
   }
 
-  connect();
+  void connect();
 
   return {
     close(): void {

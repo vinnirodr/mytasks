@@ -98,21 +98,4 @@ describe("authApi", () => {
       });
     });
   });
-
-  describe("refresh", () => {
-    test("posts the refresh token without auth and returns a new access token", async () => {
-      mockRequest.mockResolvedValueOnce({ access: "new-access-token" });
-
-      const result = await authApi.refresh("refresh-token");
-
-      expect(mockRequest).toHaveBeenCalledTimes(1);
-      expect(mockRequest).toHaveBeenCalledWith("/api/auth/token/refresh/", {
-        method: "POST",
-        body: { refresh: "refresh-token" },
-        auth: false,
-      });
-
-      expect(result).toEqual({ access: "new-access-token" });
-    });
-  });
 });

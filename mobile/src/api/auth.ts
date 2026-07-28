@@ -22,10 +22,6 @@ export type TokenPair = {
   refresh: string;
 };
 
-export type RefreshResult = {
-  access: string;
-};
-
 type UserResponse = {
   id: string;
   email: string;
@@ -73,17 +69,8 @@ async function me(): Promise<AuthUser> {
   return mapUser(response);
 }
 
-async function refresh(refreshToken: string): Promise<RefreshResult> {
-  return apiClient.request<RefreshResult>("/api/auth/token/refresh/", {
-    method: "POST",
-    body: { refresh: refreshToken },
-    auth: false,
-  });
-}
-
 export const authApi = {
   register,
   login,
   me,
-  refresh,
 };

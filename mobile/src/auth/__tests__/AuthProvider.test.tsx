@@ -118,6 +118,32 @@ test("signIn transitions signedOut to signedIn with the user", async () => {
   expect(latest?.user).toEqual(user);
 });
 
+test("signIn clears tokens and rejects when login succeeds but me() rejects", async () => {
+  mockGetAccess.mockResolvedValue(null);
+  mockLogin.mockResolvedValue({ access: "a", refresh: "r" });
+  mockSetTokens.mockResolvedValue(undefined);
+  mockClear.mockResolvedValue(undefined);
+  mockMe.mockRejectedValue(new Error("me failed"));
+
+  render(
+    <AuthProvider>
+      <Probe />
+    </AuthProvider>,
+  );
+
+  await waitFor(() => {
+    expect(latest?.status).toBe("signedOut");
+  });
+
+  await act(async () => {
+    await expect(latest?.signIn("a@b.com", "secret")).rejects.toThrow("me failed");
+  });
+
+  expect(mockSetTokens).toHaveBeenCalledWith({ access: "a", refresh: "r" });
+  expect(mockClear).toHaveBeenCalledTimes(1);
+  expect(latest?.status).toBe("signedOut");
+});
+
 test("signOut clears tokens and returns to signedOut", async () => {
   mockGetAccess.mockResolvedValue("stored-access");
   mockMe.mockResolvedValue(user);

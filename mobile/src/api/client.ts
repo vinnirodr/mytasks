@@ -37,9 +37,11 @@ async function parseJson(response: Response): Promise<unknown> {
 }
 
 async function performFetch(path: string, options: RequestOptions, accessToken: string | null): Promise<Response> {
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-  };
+  const headers: Record<string, string> = {};
+
+  if (options.body !== undefined) {
+    headers["Content-Type"] = "application/json";
+  }
 
   if (options.auth !== false && accessToken) {
     headers.Authorization = `Bearer ${accessToken}`;
@@ -110,6 +112,13 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
 
     const newAccessToken = await tokenStore.getAccess();
     const retryResponse = await performFetch(path, options, newAccessToken);
+
+    if (retryResponse.status === 401) {
+      await tokenStore.clear();
+      onUnauthorized();
+      const data = await parseJson(retryResponse);
+      throw new ApiError(401, data);
+    }
 
     if (!retryResponse.ok) {
       const data = await parseJson(retryResponse);

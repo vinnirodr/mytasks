@@ -8,7 +8,7 @@
  * app (see api/client.ts) drops the session back to "signedOut".
  */
 
-import { createContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 
 import { authApi, type AuthUser } from "@/api/auth";
 import { apiClient } from "@/api/client";
@@ -65,24 +65,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  async function signOut() {
+  const signOut = useCallback(async () => {
     await tokenStore.clear();
     setUser(null);
     setStatus("signedOut");
-  }
+  }, []);
 
   useEffect(() => {
     apiClient.setOnUnauthorized(() => {
       void signOut();
     });
-  }, []);
+  }, [signOut]);
 
   async function signIn(email: string, password: string) {
     const tokens = await authApi.login({ email, password });
     await tokenStore.setTokens(tokens);
-    const me = await authApi.me();
-    setUser(me);
-    setStatus("signedIn");
+    try {
+      const me = await authApi.me();
+      setUser(me);
+      setStatus("signedIn");
+    } catch (error) {
+      await tokenStore.clear();
+      throw error;
+    }
   }
 
   async function register(email: string, password: string, displayName: string) {
