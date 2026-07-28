@@ -102,3 +102,29 @@ def test_reminder_window_crosses_midnight(env, monkeypatch):
     now = datetime.datetime(2026, 7, 27, 23, 52, tzinfo=ZoneInfo(SP))
     monkeypatch.setattr(services, "send_push", lambda *a, **k: True)
     assert services.send_reminders(now_dt=now) == 1
+
+
+def test_bad_timezone_env_does_not_abort_other_envs(env, monkeypatch):
+    good_env, ana = env
+    PushToken.objects.create(user=ana, token="ExponentPushToken[a]")
+    _occ(good_env, datetime.time(12, 10), assignee=ana)
+    bob = User.objects.create_user(email="bad@example.com", password="x")
+    bad_env = Environment.create_with_admin(name="Bad", env_type="HOUSE", owner=bob)
+    Environment.objects.filter(pk=bad_env.pk).update(timezone="Not/AZone")
+    monkeypatch.setattr(services, "send_push", lambda *a, **k: True)
+    # the good environment is still reminded despite the broken one
+    assert services.send_reminders(now_dt=_now()) == 1
+
+
+def test_row_is_claimed_before_sending(env, monkeypatch):
+    environment, ana = env
+    PushToken.objects.create(user=ana, token="ExponentPushToken[a]")
+    occ = _occ(environment, datetime.time(12, 10), assignee=ana)
+
+    def assert_already_claimed(tokens, *a, **k):
+        occ.refresh_from_db()
+        assert occ.reminder_sent is True  # claimed before the push is attempted
+        return True
+
+    monkeypatch.setattr(services, "send_push", assert_already_claimed)
+    assert services.send_reminders(now_dt=_now()) == 1
