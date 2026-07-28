@@ -307,7 +307,7 @@ describe("weekStartISO", () => {
     expect(weekStartISO(new Date(2026, 0, 4))).toBe("2025-12-29"); // Sun Jan 4 2026 -> Mon Dec 29 2025
   });
 
-  test("handles a month rollover for a non-Sunday date (Sunday Mar 1 2026 -> Mon Feb 23 2026)", () => {
+  test("handles a month rollover when the Sunday itself is the 1st of the month (Sunday Mar 1 2026 -> Mon Feb 23 2026)", () => {
     expect(weekStartISO(new Date(2026, 2, 1))).toBe("2026-02-23");
   });
 
@@ -323,5 +323,25 @@ describe("weekStartISO", () => {
     jest.useFakeTimers().setSystemTime(new Date(2026, 6, 28, 23, 30, 0));
 
     expect(weekStartISO()).toBe("2026-07-27");
+  });
+
+  // The Tuesday-night probe above reuses the SAME Mon-Sun week whether or not the
+  // instant gets UTC-shifted forward by a few hours (Tue 23:30 -> Wed still sits in
+  // the Jul 27-Aug 2 week), so it would pass even against a buggy toISOString()/
+  // getUTCDay()-based implementation. These two probes straddle an actual
+  // Sunday->Monday WEEK boundary, so a UTC shift across midnight would land in a
+  // different week and produce a different (wrong) Monday, genuinely failing.
+  test("rolls back to the previous week for a Sunday-night boundary probe (discriminates against a UTC-shifted implementation)", () => {
+    // Sun Aug 2 2026, 23:30 local -> correct Monday is Jul 27 (the week containing
+    // Aug 2). A UTC-based implementation could shift this instant to Mon Aug 3,
+    // which belongs to the NEXT week, wrongly returning 2026-08-03.
+    expect(weekStartISO(new Date(2026, 7, 2, 23, 30, 0))).toBe("2026-07-27");
+  });
+
+  test("stays in the new week for a just-after-midnight Monday boundary probe (discriminates against a UTC-shifted implementation)", () => {
+    // Mon Aug 3 2026, 00:30 local -> correct Monday is itself, Aug 3. A UTC-based
+    // implementation could shift this instant backward past midnight to Sun Aug 2
+    // (the PREVIOUS week), wrongly returning 2026-07-27.
+    expect(weekStartISO(new Date(2026, 7, 3, 0, 30, 0))).toBe("2026-08-03");
   });
 });

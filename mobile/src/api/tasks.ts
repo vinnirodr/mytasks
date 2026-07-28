@@ -31,11 +31,27 @@ function mapRecurringTask(response: RecurringTaskResponse): RecurringTask {
   };
 }
 
+type TaskDefinitionResponse = {
+  id: string;
+  name: string;
+  icon: string;
+};
+
+function mapTaskDefinition(response: TaskDefinitionResponse): TaskDefinition {
+  return {
+    id: response.id,
+    name: response.name,
+    icon: response.icon,
+  };
+}
+
 async function createDefinition(envId: string, input: { name: string; icon?: string }): Promise<TaskDefinition> {
-  return apiClient.request<TaskDefinition>(`/api/environments/${envId}/task-definitions/`, {
+  const response = await apiClient.request<TaskDefinitionResponse>(`/api/environments/${envId}/task-definitions/`, {
     method: "POST",
     body: { name: input.name, icon: input.icon ?? "" },
   });
+
+  return mapTaskDefinition(response);
 }
 
 async function createRecurring(
