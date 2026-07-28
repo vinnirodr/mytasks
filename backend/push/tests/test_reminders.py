@@ -86,3 +86,19 @@ def test_open_task_reminds_all_active_members(env, monkeypatch):
     )
     services.send_reminders(now_dt=_now())
     assert seen["tokens"] == {"ExponentPushToken[ana]", "ExponentPushToken[bob]"}
+
+
+def test_reminder_window_crosses_midnight(env, monkeypatch):
+    environment, ana = env
+    PushToken.objects.create(user=ana, token="ExponentPushToken[a]")
+    # Occurrence tomorrow at 00:05; sweep at 23:52 today (13 min before → in window).
+    Occurrence.objects.create(
+        environment=environment,
+        title="Madrugada",
+        date=datetime.date(2026, 7, 28),
+        time=datetime.time(0, 5),
+        assignee=ana,
+    )
+    now = datetime.datetime(2026, 7, 27, 23, 52, tzinfo=ZoneInfo(SP))
+    monkeypatch.setattr(services, "send_push", lambda *a, **k: True)
+    assert services.send_reminders(now_dt=now) == 1

@@ -30,7 +30,7 @@ def _due_occurrences(environment, local_now):
         reminder_sent=False,
         status=Occurrence.Status.PENDING,
         time__isnull=False,
-        date=local_now.date(),
+        date__in=[local_now.date(), local_now.date() + datetime.timedelta(days=1)],
     )
     due = []
     for occ in candidates:
