@@ -41,13 +41,25 @@ type BoardUpdateMessage = {
   status: OccurrenceStatus;
 };
 
+const OCCURRENCE_STATUSES: readonly OccurrenceStatus[] = [
+  "PENDING",
+  "LATE",
+  "DONE",
+  "POSTPONED",
+  "MISSED",
+];
+
+function isOccurrenceStatus(value: unknown): value is OccurrenceStatus {
+  return typeof value === "string" && (OCCURRENCE_STATUSES as readonly string[]).includes(value);
+}
+
 function isBoardUpdate(data: unknown): data is BoardUpdateMessage {
   if (typeof data !== "object" || data === null) return false;
   const candidate = data as Record<string, unknown>;
   return (
     candidate.kind === "board_update" &&
     typeof candidate.occurrence_id === "string" &&
-    typeof candidate.status === "string"
+    isOccurrenceStatus(candidate.status)
   );
 }
 

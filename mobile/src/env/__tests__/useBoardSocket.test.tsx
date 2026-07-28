@@ -239,6 +239,28 @@ describe("useBoardSocket", () => {
     expect(getHarness().getRefetchCalls()).toBe(0);
   });
 
+  test("board_update with an invalid status is ignored (no board mutation, no refetch)", () => {
+    let handlers: SocketHandlers | undefined;
+    mockCreateSocket.mockImplementation((_envId, _getToken, h: SocketHandlers) => {
+      handlers = h;
+      return { close: jest.fn() };
+    });
+
+    const original = [occurrence({ id: "1", status: "PENDING" })];
+    const getHarness = renderBoardSocket(original, "env-a");
+
+    act(() => {
+      handlers!.onMessage({ kind: "board_update", occurrence_id: "1", status: "BOGUS" });
+    });
+
+    act(() => {
+      jest.advanceTimersByTime(500);
+    });
+
+    expect(getHarness().getOccurrences()).toEqual(original);
+    expect(getHarness().getRefetchCalls()).toBe(0);
+  });
+
   test("onOpen/onClose toggle connected", () => {
     let handlers: SocketHandlers | undefined;
     mockCreateSocket.mockImplementation((_envId, _getToken, h: SocketHandlers) => {
