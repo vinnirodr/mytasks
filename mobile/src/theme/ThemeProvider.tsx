@@ -35,6 +35,10 @@ export type ThemeContextValue = {
   mode: ThemeMode;
   isDark: boolean;
   colors: ResolvedColors;
+  /** Resolved primary-action color: `forest` (day) / `accent` (night). */
+  action: string;
+  /** Resolved text-on-action color: `onForest` (day) / `onAccent` (night). */
+  onAction: string;
   spacing: typeof spacing;
   radius: typeof radius;
   heights: typeof heights;
@@ -64,6 +68,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       mode,
       isDark,
       colors: isDark ? darkColors : lightColors,
+      action: isDark ? darkColors.accent : lightColors.forest,
+      onAction: isDark ? darkColors.onAccent : lightColors.onForest,
       spacing,
       radius,
       heights,
